@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation - BERA PAY</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>💳 BERA PAY</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/docs" class="active">API Docs</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="#" onclick="openLoginModal()">Login</a>
+                <a href="#" onclick="openRegisterModal()" class="btn-primary">Sign Up Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="docs-container">
+        <div class="docs-sidebar">
+            <h3>API Reference</h3>
+            <ul class="docs-nav">
+                <li><a href="#authentication">Authentication</a></li>
+                <li><a href="#stk-push">STK Push</a></li>
+                <li><a href="#transaction-status">Transaction Status</a></li>
+                <li><a href="#b2c-payout">B2C Payout</a></li>
+                <li><a href="#commission">Commission Model</a></li>
+                <li><a href="#error-codes">Error Codes</a></li>
+            </ul>
+        </div>
+
+        <div class="docs-content">
+            <h1>BERA PAY API Documentation</h1>
+            <p class="docs-intro">
+                Welcome to BERA PAY API documentation. Integrate M-Pesa payments into your application 
+                with our simple REST API.
+            </p>
+
+            <section id="authentication" class="docs-section">
+                <h2>Authentication</h2>
+                <p>All API requests require an API key sent in the Authorization header:</p>
+                <pre><code>Authorization: Bearer &lt;your_api_key&gt;</code></pre>
+                <p>Get your API key from the <a href="/dashboard">Dashboard</a> after signing up.</p>
+            </section>
+
+            <section id="stk-push" class="docs-section">
+                <h2>Initiate STK Push</h2>
+                <p>Initiate an M-Pesa STK Push payment request.</p>
+                
+                <h3>Endpoint</h3>
+                <pre><code>POST /api/stk-push</code></pre>
+
+                <h3>Headers</h3>
+                <pre><code>Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json</code></pre>
+
+                <h3>Request Body</h3>
+                <pre><code>{
+  "phone_number": "254712345678",
+  "amount": 100,
+  "reference": "ORDER-1234" // Optional
+}</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "message": "STK push initiated successfully",
+  "data": {
+    "reference": "BERA-1701234567890-abc123",
+    "payhero_reference": "PH123456789",
+    "amount": 100,
+    "commission": 6,
+    "net_amount": 94
+  }
+}</code></pre>
+            </section>
+
+            <section id="transaction-status" class="docs-section">
+                <h2>Check Transaction Status</h2>
+                <p>Check the status of a transaction using its reference.</p>
+
+                <h3>Endpoint</h3>
+                <pre><code>GET /api/transaction-status/:reference</code></pre>
+
+                <h3>Headers</h3>
+                <pre><code>Authorization: Bearer &lt;your_api_key&gt;</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "data": {
+    "id": 1,
+    "amount": 100,
+    "commission": 6,
+    "net_amount": 94,
+    "reference": "ORDER-1234",
+    "status": "completed",
+    "created_at": "2024-01-01T12:00:00.000Z"
+  }
+}</code></pre>
+            </section>
+
+            <section id="b2c-payout" class="docs-section">
+                <h2>B2C Payout</h2>
+                <p>Withdraw funds to an M-Pesa number via B2C payout.</p>
+
+                <h3>Endpoint</h3>
+                <pre><code>POST /api/b2c-payout</code></pre>
+
+                <h3>Headers</h3>
+                <pre><code>Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json</code></pre>
+
+                <h3>Request Body</h3>
+                <pre><code>{
+  "phone_number": "254712345678",
+  "amount": 100
+}</code></pre>
+
+                <h3>Response</h3>
+                <pre><code>{
+  "success": true,
+  "message": "Payout initiated successfully",
+  "data": {
+    "reference": "PAYOUT-1701234567890-xyz789",
+    "payhero_reference": "PH987654321",
+    "amount": 100
+  }
+}</code></pre>
+            </section>
+
+            <section id="commission" class="docs-section">
+                <h2>Commission Model</h2>
+                <p>BERA PAY uses a tiered commission structure:</p>
+                
+                <div class="commission-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Amount Range (KES)</th>
+                                <th>Commission (KES)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>≤ 100</td>
+                                <td>6</td>
+                            </tr>
+                            <tr>
+                                <td>101 - 500</td>
+                                <td>24</td>
+                            </tr>
+                            <tr>
+                                <td>501 - 1000</td>
+                                <td>48</td>
+                            </tr>
+                            <tr>
+                                <td>> 1000</td>
+                                <td>5% of amount</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Example Calculation</h3>
+                <pre><code>Amount: 150 KES
+Commission: 24 KES
+Developer receives: 126 KES</code></pre>
+            </section>
+
+            <section id="error-codes" class="docs-section">
+                <h2>Error Codes</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>HTTP Status</th>
+                            <th>Error Code</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>400</td>
+                            <td>INVALID_REQUEST</td>
+                            <td>Missing or invalid parameters</td>
+                        </tr>
+                        <tr>
+                            <td>401</td>
+                            <td>UNAUTHORIZED</td>
+                            <td>Invalid or missing API key</td>
+                        </tr>
+                        <tr>
+                            <td>402</td>
+                            <td>INSUFFICIENT_BALANCE</td>
+                            <td>Insufficient balance for payout</td>
+                        </tr>
+                        <tr>
+                            <td>404</td>
+                            <td>NOT_FOUND</td>
+                            <td>Transaction not found</td>
+                        </tr>
+                        <tr>
+                            <td>500</td>
+                            <td>INTERNAL_ERROR</td>
+                            <td>Server error</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="docs-section">
+                <h2>Getting Started</h2>
+                <ol>
+                    <li><a href="#" onclick="openRegisterModal()">Sign up</a> for a BERA PAY account</li>
+                    <li>Get your API key from the Dashboard</li>
+                    <li>Integrate the STK Push endpoint into your application</li>
+                    <li>Test with small amounts first</li>
+                    <li>Go live and start accepting payments!</li>
+                </ol>
+
+                <div class="cta-box">
+                    <h3>Ready to integrate?</h3>
+                    <p>Get your API key and start accepting payments in minutes.</p>
+                    <button class="btn-large" onclick="openRegisterModal()">Get Started Free</button>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Create Your BERA PAY Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <input type="text" id="regName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">Phone Number</label>
+                    <input type="tel" id="regPhone" name="phone" placeholder="254712345678" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div id="registerResult" class="result"></div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Login to BERA PAY</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <div id="loginResult" class="result"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

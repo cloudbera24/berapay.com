@@ -1249,645 +1249,701 @@ Developer receives: 126 KES</code></pre>
             <div id="loginResult" class="result"></div>
         </div>
     </div>
+<script>
+    // BERA PAY Frontend JavaScript - Combined Version
 
-    <script>
-        // BERA PAY Frontend JavaScript - Combined Version
+    // Global variables
+    let currentDeveloper = null;
+    let authToken = localStorage.getItem('beraPayToken');
 
-        // Global variables
-        let currentDeveloper = null;
-        let authToken = localStorage.getItem('beraPayToken');
+    // DOM Content Loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔍 Checking authentication status...');
+        console.log('Token exists:', !!authToken);
+        
+        // Update navigation based on auth status
+        updateNavigation();
+        
+        // Check if user is trying to access dashboard without auth
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page') || 'home';
+        
+        if (page === 'dashboard' && !authToken) {
+            showPage('home');
+            showNotification('Please login to access dashboard', 'error');
+        } else {
+            showPage(page);
+        }
+        
+        // Initialize modals
+        initModals();
+        
+        // Initialize forms
+        initForms();
+        
+        // Test connection on load
+        testConnection();
+    });
 
-        // DOM Content Loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🔍 Checking authentication status...');
-            console.log('Token exists:', !!authToken);
-            
-            // Update navigation based on auth status
-            updateNavigation();
-            
-            // Check if user is trying to access dashboard without auth
-            const urlParams = new URLSearchParams(window.location.search);
-            const page = urlParams.get('page') || 'home';
-            
-            if (page === 'dashboard' && !authToken) {
-                showPage('home');
-                showNotification('Please login to access dashboard', 'error');
-            } else {
-                showPage(page);
-            }
-            
-            // Initialize modals
-            initModals();
-            
-            // Initialize forms
-            initForms();
+    // Test backend connection
+    async function testConnection() {
+        try {
+            const response = await fetch('/api/health');
+            const result = await response.json();
+            console.log('🔗 Backend connection:', result.success ? '✅ Connected' : '❌ Failed');
+        } catch (error) {
+            console.error('❌ Backend connection failed:', error);
+        }
+    }
+
+    // Page Navigation
+    function showPage(pageName) {
+        console.log('🔄 Switching to page:', pageName);
+        
+        // Hide all pages
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
         });
-
-        // Page Navigation
-        function showPage(pageName) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(page => {
-                page.classList.remove('active');
-            });
-            
-            // Show selected page
-            document.getElementById(pageName).classList.add('active');
-            
-            // Update URL without reload
-            const newUrl = window.location.origin + window.location.pathname + (pageName === 'home' ? '' : `?page=${pageName}`);
-            window.history.pushState({ page: pageName }, '', newUrl);
-            
+        
+        // Show selected page
+        const targetPage = document.getElementById(pageName);
+        if (targetPage) {
+            targetPage.classList.add('active');
+        } else {
+            console.error('❌ Page not found:', pageName);
+            document.getElementById('home').classList.add('active');
+        }
+        
+        // Update URL without reload
+        const newUrl = window.location.origin + window.location.pathname + (pageName === 'home' ? '' : `?page=${pageName}`);
+        window.history.pushState({ page: pageName }, '', newUrl);
+        
             // Update navigation active state
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.remove('active');
             });
-            event?.target.classList.add('active');
             
-            // Load dashboard data if needed
-            if (pageName === 'dashboard' && authToken) {
-                loadDashboardData();
-            }
-        }
-
-        // Update navigation based on auth status
-        function updateNavigation() {
-            const loginLink = document.getElementById('loginLink');
-            const registerLink = document.getElementById('registerLink');
-            const logoutLink = document.getElementById('logoutLink');
-            
-            if (authToken) {
-                loginLink.style.display = 'none';
-                registerLink.style.display = 'none';
-                logoutLink.style.display = 'inline-block';
-            } else {
-                loginLink.style.display = 'inline-block';
-                registerLink.style.display = 'inline-block';
-                logoutLink.style.display = 'none';
-            }
-        }
-
-        // Dashboard Section Navigation
-        function showDashboardSection(sectionId) {
-            // Hide all sections
-            document.querySelectorAll('#dashboard .section').forEach(section => {
-                section.classList.remove('active');
+            // Find and activate the correct nav link
+            const activeLink = Array.from(document.querySelectorAll('.nav-links a')).find(link => {
+                if (link.textContent.includes('Home') && pageName === 'home') return true;
+                if (link.textContent.includes('API Docs') && pageName === 'docs') return true;
+                if (link.textContent.includes('Dashboard') && pageName === 'dashboard') return true;
+                return false;
             });
             
-            // Remove active class from all menu items
-            document.querySelectorAll('.menu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Show selected section
-            document.getElementById(sectionId).classList.add('active');
-            
-            // Add active class to clicked menu item
-            event.target.classList.add('active');
-        }
-
-        // Docs Section Navigation
-        function scrollToDocsSection(sectionId) {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth' });
+            if (activeLink) {
+                activeLink.classList.add('active');
             }
-        }
-
-        // Modal Functions
-        function openRegisterModal() {
-            document.getElementById('registerModal').style.display = 'block';
-        }
-
-        function closeRegisterModal() {
-            document.getElementById('registerModal').style.display = 'none';
-            document.getElementById('registerResult').innerHTML = '';
-            document.getElementById('registerForm').reset();
-        }
-
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
-        }
-
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-            document.getElementById('loginResult').innerHTML = '';
-            document.getElementById('loginForm').reset();
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const registerModal = document.getElementById('registerModal');
-            const loginModal = document.getElementById('loginModal');
-            
-            if (event.target === registerModal) {
-                closeRegisterModal();
-            }
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-        }
-
-        // Initialize modals
-        function initModals() {
-            // Registration form
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) {
-                registerForm.addEventListener('submit', handleRegister);
-            }
-            
-            // Login form
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', handleLogin);
-            }
-        }
-
-        // Initialize forms
-        function initForms() {
-            // STK Push form
-            const stkForm = document.getElementById('stkForm');
-            if (stkForm) {
-                stkForm.addEventListener('submit', handleSTKPush);
-            }
-            
-            // Payout form
-            const payoutForm = document.getElementById('payoutForm');
-            if (payoutForm) {
-                payoutForm.addEventListener('submit', handlePayout);
-            }
-        }
-
-        // Registration Handler
-        async function handleRegister(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                password: formData.get('password')
-            };
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            try {
-                submitBtn.innerHTML = '🔄 Creating Account...';
-                submitBtn.disabled = true;
-                
-                const response = await fetch('/api/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                const resultDiv = document.getElementById('registerResult');
-                
-                if (result.success) {
-                    resultDiv.className = 'result success';
-                    resultDiv.innerHTML = `
-                        ✅ Registration successful!<br>
-                        <strong>API Key:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${result.data.api_key}</code><br>
-                        <small style="color: #666;">Save this key securely - it won't be shown again.</small><br><br>
-                        <strong>Auto-login in 3 seconds...</strong>
-                    `;
-                    
-                    // Store token and redirect to dashboard
-                    localStorage.setItem('beraPayToken', result.data.token);
-                    authToken = result.data.token;
-                    updateNavigation();
-                    
-                    setTimeout(() => {
-                        showPage('dashboard');
-                    }, 3000);
-                    
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ ${result.error}`;
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                const resultDiv = document.getElementById('registerResult');
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Registration failed. Please try again.';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        }
-
-        // Login Handler
-        async function handleLogin(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const data = {
-                email: formData.get('email'),
-                password: formData.get('password')
-            };
-            
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            const originalText = submitBtn.innerHTML;
-            
-            try {
-                submitBtn.innerHTML = '🔄 Logging in...';
-                submitBtn.disabled = true;
-                
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                const resultDiv = document.getElementById('loginResult');
-                
-                if (result.success) {
-                    resultDiv.className = 'result success';
-                    resultDiv.textContent = '✅ Login successful! Redirecting...';
-                    
-                    // Store token and redirect
-                    localStorage.setItem('beraPayToken', result.data.token);
-                    authToken = result.data.token;
-                    updateNavigation();
-                    
-                    setTimeout(() => {
-                        showPage('dashboard');
-                        closeLoginModal();
-                    }, 1000);
-                    
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ ${result.error}`;
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.disabled = false;
-                }
-            } catch (error) {
-                const resultDiv = document.getElementById('loginResult');
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Login failed. Please try again.';
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
-            }
-        }
-
-        // Logout Function
-        function logout() {
-            console.log('🚪 Logging out...');
-            localStorage.removeItem('beraPayToken');
-            authToken = null;
-            updateNavigation();
-            showPage('home');
-            showNotification('Logged out successfully', 'success');
-        }
-
-        // Dashboard Functions
-        async function loadDashboardData() {
+        
+        // Load dashboard data if needed
+        if (pageName === 'dashboard' && authToken) {
             console.log('📊 Loading dashboard data...');
+            loadDashboardData();
+        }
+        
+        // Reset dashboard sections when switching to dashboard
+        if (pageName === 'dashboard') {
+            showDashboardSection('overview');
+        }
+    }
+
+    // Update navigation based on auth status
+    function updateNavigation() {
+        const loginLink = document.getElementById('loginLink');
+        const registerLink = document.getElementById('registerLink');
+        const logoutLink = document.getElementById('logoutLink');
+        
+        if (authToken) {
+            loginLink.style.display = 'none';
+            registerLink.style.display = 'none';
+            logoutLink.style.display = 'inline-block';
+            console.log('✅ User is logged in');
+        } else {
+            loginLink.style.display = 'inline-block';
+            registerLink.style.display = 'inline-block';
+            logoutLink.style.display = 'none';
+            console.log('❌ User is not logged in');
+        }
+    }
+
+    // Dashboard Section Navigation
+    function showDashboardSection(sectionId) {
+        console.log('📱 Switching to dashboard section:', sectionId);
+        
+        // Hide all sections
+        document.querySelectorAll('#dashboard .section').forEach(section => {
+            section.classList.remove('active');
+        });
+        
+        // Remove active class from all menu items
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        // Show selected section
+        document.getElementById(sectionId).classList.add('active');
+        
+        // Add active class to clicked menu item
+        event.target.classList.add('active');
+    }
+
+    // Docs Section Navigation
+    function scrollToDocsSection(sectionId) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+
+    // Modal Functions
+    function openRegisterModal() {
+        document.getElementById('registerModal').style.display = 'block';
+    }
+
+    function closeRegisterModal() {
+        document.getElementById('registerModal').style.display = 'none';
+        document.getElementById('registerResult').innerHTML = '';
+        document.getElementById('registerForm').reset();
+    }
+
+    function openLoginModal() {
+        document.getElementById('loginModal').style.display = 'block';
+    }
+
+    function closeLoginModal() {
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('loginResult').innerHTML = '';
+        document.getElementById('loginForm').reset();
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const registerModal = document.getElementById('registerModal');
+        const loginModal = document.getElementById('loginModal');
+        
+        if (event.target === registerModal) {
+            closeRegisterModal();
+        }
+        if (event.target === loginModal) {
+            closeLoginModal();
+        }
+    }
+
+    // Initialize modals
+    function initModals() {
+        // Registration form
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleRegister);
+        }
+        
+        // Login form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
+        }
+    }
+
+    // Initialize forms
+    function initForms() {
+        // STK Push form
+        const stkForm = document.getElementById('stkForm');
+        if (stkForm) {
+            stkForm.addEventListener('submit', handleSTKPush);
+        }
+        
+        // Payout form
+        const payoutForm = document.getElementById('payoutForm');
+        if (payoutForm) {
+            payoutForm.addEventListener('submit', handlePayout);
+        }
+    }
+
+    // Registration Handler
+    async function handleRegister(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            password: formData.get('password')
+        };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        try {
+            submitBtn.innerHTML = '🔄 Creating Account...';
+            submitBtn.disabled = true;
             
-            try {
-                const response = await fetch('/api/dashboard', {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
+            console.log('📤 Sending registration request:', { ...data, password: '***' });
+            
+            const response = await fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            console.log('📥 Registration response:', result);
+            
+            const resultDiv = document.getElementById('registerResult');
+            
+            if (result.success) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    ✅ Registration successful!<br>
+                    <strong>API Key:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${result.data.api_key}</code><br>
+                    <small style="color: #666;">Save this key securely - it won't be shown again.</small><br><br>
+                    <strong>Auto-login in 3 seconds...</strong>
+                `;
                 
-                console.log('📡 Dashboard response status:', response.status);
+                // Store token and redirect to dashboard
+                localStorage.setItem('beraPayToken', result.data.token);
+                authToken = result.data.token;
+                updateNavigation();
                 
-                if (response.status === 401) {
-                    console.log('❌ Token invalid, logging out...');
+                setTimeout(() => {
+                    showPage('dashboard');
+                    closeRegisterModal();
+                }, 3000);
+                
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ${result.error}`;
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('💥 Registration error:', error);
+            const resultDiv = document.getElementById('registerResult');
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Registration failed. Please check your connection and try again.';
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Login Handler
+    async function handleLogin(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = {
+            email: formData.get('email'),
+            password: formData.get('password')
+        };
+        
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        try {
+            submitBtn.innerHTML = '🔄 Logging in...';
+            submitBtn.disabled = true;
+            
+            console.log('📤 Sending login request:', { ...data, password: '***' });
+            
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            console.log('📥 Login response:', result);
+            
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (result.success) {
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✅ Login successful! Redirecting...';
+                
+                // Store token and redirect
+                localStorage.setItem('beraPayToken', result.data.token);
+                authToken = result.data.token;
+                updateNavigation();
+                
+                setTimeout(() => {
+                    showPage('dashboard');
+                    closeLoginModal();
+                }, 1000);
+                
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ${result.error}`;
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            console.error('💥 Login error:', error);
+            const resultDiv = document.getElementById('loginResult');
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Login failed. Please check your connection and try again.';
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    // Logout Function
+    function logout() {
+        console.log('🚪 Logging out...');
+        localStorage.removeItem('beraPayToken');
+        authToken = null;
+        updateNavigation();
+        showPage('home');
+        showNotification('Logged out successfully', 'success');
+    }
+
+    // Dashboard Functions
+    async function loadDashboardData() {
+        console.log('📊 Loading dashboard data...');
+        
+        try {
+            const response = await fetch('/api/dashboard', {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            console.log('📡 Dashboard response status:', response.status);
+            
+            if (response.status === 401) {
+                console.log('❌ Token invalid, logging out...');
+                logout();
+                showNotification('Session expired. Please login again.', 'error');
+                return;
+            }
+            
+            const result = await response.json();
+            console.log('📊 Dashboard result:', result);
+            
+            if (result.success) {
+                currentDeveloper = result.data.developer;
+                updateDashboardUI(result.data);
+                showNotification('Dashboard loaded successfully', 'success');
+            } else {
+                console.log('❌ Dashboard API error:', result.error);
+                if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
                     logout();
-                    return;
-                }
-                
-                const result = await response.json();
-                console.log('📊 Dashboard result:', result);
-                
-                if (result.success) {
-                    currentDeveloper = result.data.developer;
-                    updateDashboardUI(result.data);
+                    showNotification('Authentication failed. Please login again.', 'error');
                 } else {
-                    console.log('❌ Dashboard API error:', result.error);
-                    if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
-                        logout();
-                    } else {
-                        showNotification('Failed to load dashboard data: ' + result.error, 'error');
-                    }
+                    showNotification('Failed to load dashboard: ' + result.error, 'error');
                 }
-            } catch (error) {
-                console.error('💥 Failed to load dashboard:', error);
-                showNotification('Network error loading dashboard', 'error');
             }
+        } catch (error) {
+            console.error('💥 Failed to load dashboard:', error);
+            showNotification('Network error loading dashboard', 'error');
         }
+    }
 
-        function updateDashboardUI(data) {
-            console.log('🎨 Updating dashboard UI with data:', data);
-            
-            // Update stats
-            if (document.getElementById('balance')) {
-                document.getElementById('balance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
-            }
-            if (document.getElementById('totalTx')) {
-                document.getElementById('totalTx').textContent = (data.stats.total_transactions || 0).toLocaleString();
-            }
-            if (document.getElementById('totalVolume')) {
-                document.getElementById('totalVolume').textContent = `KES ${(data.stats.total_volume || 0).toLocaleString()}`;
-            }
-            if (document.getElementById('totalCommission')) {
-                document.getElementById('totalCommission').textContent = `KES ${(data.stats.total_commission || 0).toLocaleString()}`;
-            }
-            
-            // Update withdraw balance
-            if (document.getElementById('withdrawBalance')) {
-                document.getElementById('withdrawBalance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
-            }
-            
-            // Update API key
-            if (document.getElementById('apiKeyDisplay')) {
-                document.getElementById('apiKeyDisplay').textContent = data.developer.api_key || 'Not available';
-            }
-            
-            // Update recent transactions
-            if (document.getElementById('recentTransactions')) {
-                updateRecentTransactions(data.recent_transactions || []);
-            }
-            
-            // Update recent payouts
-            if (document.getElementById('recentPayouts')) {
-                updateRecentPayouts(data.recent_payouts || []);
-            }
-            
-            console.log('✅ Dashboard UI updated successfully');
+    function updateDashboardUI(data) {
+        console.log('🎨 Updating dashboard UI with data:', data);
+        
+        // Update stats
+        if (document.getElementById('balance')) {
+            document.getElementById('balance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
         }
+        if (document.getElementById('totalTx')) {
+            document.getElementById('totalTx').textContent = (data.stats.total_transactions || 0).toLocaleString();
+        }
+        if (document.getElementById('totalVolume')) {
+            document.getElementById('totalVolume').textContent = `KES ${(data.stats.total_volume || 0).toLocaleString()}`;
+        }
+        if (document.getElementById('totalCommission')) {
+            document.getElementById('totalCommission').textContent = `KES ${(data.stats.total_commission || 0).toLocaleString()}`;
+        }
+        
+        // Update withdraw balance
+        if (document.getElementById('withdrawBalance')) {
+            document.getElementById('withdrawBalance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
+        }
+        
+        // Update API key
+        if (document.getElementById('apiKeyDisplay')) {
+            document.getElementById('apiKeyDisplay').textContent = data.developer.api_key || 'Not available';
+        }
+        
+        // Update recent transactions
+        if (document.getElementById('recentTransactions')) {
+            updateRecentTransactions(data.recent_transactions || []);
+        }
+        
+        // Update recent payouts
+        if (document.getElementById('recentPayouts')) {
+            updateRecentPayouts(data.recent_payouts || []);
+        }
+        
+        console.log('✅ Dashboard UI updated successfully');
+    }
 
-        function updateRecentTransactions(transactions) {
-            const container = document.getElementById('recentTransactions');
-            
-            if (!transactions || transactions.length === 0) {
-                container.innerHTML = '<p class="text-muted">No transactions yet</p>';
-                return;
-            }
-            
-            container.innerHTML = transactions.map(tx => `
-                <div class="transaction-item">
-                    <div>
-                        <div class="transaction-reference">${tx.reference || 'N/A'}</div>
-                        <small>${tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'Unknown date'}</small>
-                    </div>
-                    <div>
-                        <div class="transaction-amount">KES ${tx.amount || 0}</div>
-                        <span class="transaction-status status-${tx.status || 'pending'}">${tx.status || 'pending'}</span>
-                    </div>
+    function updateRecentTransactions(transactions) {
+        const container = document.getElementById('recentTransactions');
+        
+        if (!transactions || transactions.length === 0) {
+            container.innerHTML = '<p class="text-muted">No transactions yet</p>';
+            return;
+        }
+        
+        container.innerHTML = transactions.map(tx => `
+            <div class="transaction-item">
+                <div>
+                    <div class="transaction-reference">${tx.reference || 'N/A'}</div>
+                    <small>${tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'Unknown date'}</small>
                 </div>
-            `).join('');
-        }
-
-        function updateRecentPayouts(payouts) {
-            const container = document.getElementById('recentPayouts');
-            
-            if (!payouts || payouts.length === 0) {
-                container.innerHTML = '<p class="text-muted">No payouts yet</p>';
-                return;
-            }
-            
-            container.innerHTML = payouts.map(payout => `
-                <div class="payout-item">
-                    <div>
-                        <div class="payout-reference">${payout.reference || 'N/A'}</div>
-                        <small>${payout.createdAt ? new Date(payout.createdAt).toLocaleDateString() : 'Unknown date'}</small>
-                    </div>
-                    <div>
-                        <div class="transaction-amount">KES ${payout.amount || 0}</div>
-                        <span class="transaction-status status-${payout.status || 'pending'}">${payout.status || 'pending'}</span>
-                    </div>
+                <div>
+                    <div class="transaction-amount">KES ${tx.amount || 0}</div>
+                    <span class="transaction-status status-${tx.status || 'pending'}">${tx.status || 'pending'}</span>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
+    }
 
-        // STK Push Handler
-        async function handleSTKPush(e) {
-            e.preventDefault();
+    function updateRecentPayouts(payouts) {
+        const container = document.getElementById('recentPayouts');
+        
+        if (!payouts || payouts.length === 0) {
+            container.innerHTML = '<p class="text-muted">No payouts yet</p>';
+            return;
+        }
+        
+        container.innerHTML = payouts.map(payout => `
+            <div class="payout-item">
+                <div>
+                    <div class="payout-reference">${payout.reference || 'N/A'}</div>
+                    <small>${payout.createdAt ? new Date(payout.createdAt).toLocaleDateString() : 'Unknown date'}</small>
+                </div>
+                <div>
+                    <div class="transaction-amount">KES ${payout.amount || 0}</div>
+                    <span class="transaction-status status-${payout.status || 'pending'}">${payout.status || 'pending'}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // STK Push Handler
+    async function handleSTKPush(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = {
+            phone_number: formData.get('phone'),
+            amount: parseFloat(formData.get('amount')),
+            reference: formData.get('reference') || undefined
+        };
+        
+        const resultDiv = document.getElementById('stkResult');
+        resultDiv.innerHTML = '🔄 Initiating payment...';
+        resultDiv.className = 'result';
+        
+        try {
+            const response = await fetch('/api/stk-push', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(data)
+            });
             
-            const formData = new FormData(e.target);
-            const data = {
-                phone_number: formData.get('phone'),
-                amount: parseFloat(formData.get('amount')),
-                reference: formData.get('reference') || undefined
-            };
+            const result = await response.json();
             
-            const resultDiv = document.getElementById('stkResult');
-            resultDiv.innerHTML = '🔄 Initiating payment...';
-            resultDiv.className = 'result';
-            
-            try {
-                const response = await fetch('/api/stk-push', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(data)
-                });
+            if (result.success) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    ✅ STK Push initiated!<br>
+                    <strong>Reference:</strong> ${result.data.reference}<br>
+                    <strong>Amount:</strong> KES ${result.data.amount}<br>
+                    <strong>Commission:</strong> KES ${result.data.commission}<br>
+                    <strong>You receive:</strong> KES ${result.data.net_amount}<br>
+                    <small>Customer should check their phone to complete payment</small>
+                `;
                 
-                const result = await response.json();
+                // Reload dashboard data after a delay
+                setTimeout(loadDashboardData, 2000);
                 
-                if (result.success) {
-                    resultDiv.className = 'result success';
-                    resultDiv.innerHTML = `
-                        ✅ STK Push initiated!<br>
-                        <strong>Reference:</strong> ${result.data.reference}<br>
-                        <strong>Amount:</strong> KES ${result.data.amount}<br>
-                        <strong>Commission:</strong> KES ${result.data.commission}<br>
-                        <strong>You receive:</strong> KES ${result.data.net_amount}<br>
-                        <small>Customer should check their phone to complete payment</small>
-                    `;
-                    
-                    // Reload dashboard data after a delay
-                    setTimeout(loadDashboardData, 2000);
-                    
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ ${result.error}`;
-                    
-                    // If unauthorized, logout
-                    if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
-                        setTimeout(logout, 2000);
-                    }
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ${result.error}`;
+                
+                // If unauthorized, logout
+                if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
+                    setTimeout(logout, 2000);
                 }
-            } catch (error) {
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Failed to initiate payment. Please try again.';
             }
+        } catch (error) {
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Failed to initiate payment. Please try again.';
         }
+    }
 
-        // Payout Handler
-        async function handlePayout(e) {
-            e.preventDefault();
+    // Payout Handler
+    async function handlePayout(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const data = {
+            phone_number: formData.get('phone'),
+            amount: parseFloat(formData.get('amount'))
+        };
+        
+        const resultDiv = document.getElementById('payoutResult');
+        resultDiv.innerHTML = '🔄 Processing payout...';
+        resultDiv.className = 'result';
+        
+        try {
+            const response = await fetch('/api/b2c-payout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify(data)
+            });
             
-            const formData = new FormData(e.target);
-            const data = {
-                phone_number: formData.get('phone'),
-                amount: parseFloat(formData.get('amount'))
-            };
+            const result = await response.json();
             
-            const resultDiv = document.getElementById('payoutResult');
-            resultDiv.innerHTML = '🔄 Processing payout...';
-            resultDiv.className = 'result';
-            
-            try {
-                const response = await fetch('/api/b2c-payout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
-                    },
-                    body: JSON.stringify(data)
-                });
+            if (result.success) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    ✅ Payout initiated!<br>
+                    <strong>Reference:</strong> ${result.data.reference}<br>
+                    <strong>Amount:</strong> KES ${result.data.amount}<br>
+                    <small>Funds should arrive in your M-Pesa shortly</small>
+                `;
                 
-                const result = await response.json();
+                // Reload dashboard data
+                setTimeout(loadDashboardData, 2000);
                 
-                if (result.success) {
-                    resultDiv.className = 'result success';
-                    resultDiv.innerHTML = `
-                        ✅ Payout initiated!<br>
-                        <strong>Reference:</strong> ${result.data.reference}<br>
-                        <strong>Amount:</strong> KES ${result.data.amount}<br>
-                        <small>Funds should arrive in your M-Pesa shortly</small>
-                    `;
-                    
-                    // Reload dashboard data
-                    setTimeout(loadDashboardData, 2000);
-                    
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ ${result.error}`;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `❌ ${result.error}`;
+            }
+        } catch (error) {
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Failed to process payout. Please try again.';
+        }
+    }
+
+    // Check Transaction Status
+    async function checkTransactionStatus() {
+        const reference = document.getElementById('statusReference').value.trim();
+        const resultDiv = document.getElementById('statusResult');
+        
+        if (!reference) {
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Please enter a transaction reference';
+            return;
+        }
+        
+        resultDiv.innerHTML = '🔄 Checking status...';
+        resultDiv.className = 'result';
+        
+        try {
+            const response = await fetch(`/api/transaction-status/${reference}`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
                 }
-            } catch (error) {
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Failed to process payout. Please try again.';
-            }
-        }
-
-        // Check Transaction Status
-        async function checkTransactionStatus() {
-            const reference = document.getElementById('statusReference').value.trim();
-            const resultDiv = document.getElementById('statusResult');
+            });
             
-            if (!reference) {
-                resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Please enter a transaction reference';
-                return;
-            }
+            const result = await response.json();
             
-            resultDiv.innerHTML = '🔄 Checking status...';
-            resultDiv.className = 'result';
-            
-            try {
-                const response = await fetch(`/api/transaction-status/${reference}`, {
-                    headers: {
-                        'Authorization': `Bearer ${authToken}`
-                    }
-                });
+            if (result.success) {
+                const tx = result.data;
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>Reference:</strong> ${tx.reference}<br>
+                    <strong>Amount:</strong> KES ${tx.amount}<br>
+                    <strong>Status:</strong> <span class="transaction-status status-${tx.status}">${tx.status}</span><br>
+                    <strong>Commission:</strong> KES ${tx.commission}<br>
+                    <strong>Net Amount:</strong> KES ${tx.net_amount}<br>
+                    <strong>Date:</strong> ${tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Unknown'}
+                `;
                 
-                const result = await response.json();
-                
-                if (result.success) {
-                    const tx = result.data;
-                    resultDiv.className = 'result success';
-                    resultDiv.innerHTML = `
-                        <strong>Reference:</strong> ${tx.reference}<br>
-                        <strong>Amount:</strong> KES ${tx.amount}<br>
-                        <strong>Status:</strong> <span class="transaction-status status-${tx.status}">${tx.status}</span><br>
-                        <strong>Commission:</strong> KES ${tx.commission}<br>
-                        <strong>Net Amount:</strong> KES ${tx.net_amount}<br>
-                        <strong>Date:</strong> ${tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Unknown'}
-                    `;
-                    
-                } else {
-                    resultDiv.className = 'result error';
-                    resultDiv.textContent = `❌ ${result.error}`;
-                }
-            } catch (error) {
+            } else {
                 resultDiv.className = 'result error';
-                resultDiv.textContent = '❌ Failed to check status. Please try again.';
+                resultDiv.textContent = `❌ ${result.error}`;
             }
+        } catch (error) {
+            resultDiv.className = 'result error';
+            resultDiv.textContent = '❌ Failed to check status. Please try again.';
         }
+    }
 
-        // Copy API Key
-        function copyApiKey() {
-            const apiKey = document.getElementById('apiKeyDisplay').textContent;
-            navigator.clipboard.writeText(apiKey).then(() => {
-                showNotification('API key copied to clipboard!', 'success');
+    // Copy API Key
+    function copyApiKey() {
+        const apiKey = document.getElementById('apiKeyDisplay').textContent;
+        navigator.clipboard.writeText(apiKey).then(() => {
+            showNotification('API key copied to clipboard!', 'success');
+        });
+    }
+
+    // Utility Functions
+    function scrollToFeatures() {
+        const featuresSection = document.getElementById('features');
+        if (featuresSection) {
+            featuresSection.scrollIntoView({ 
+                behavior: 'smooth' 
             });
         }
+    }
 
-        // Utility Functions
-        function scrollToFeatures() {
-            const featuresSection = document.getElementById('features');
-            if (featuresSection) {
-                featuresSection.scrollIntoView({ 
-                    behavior: 'smooth' 
-                });
-            }
+    function showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        if (type === 'success') {
+            notification.style.background = '#10b981';
+        } else if (type === 'error') {
+            notification.style.background = '#ef4444';
+        } else {
+            notification.style.background = '#3b82f6';
         }
-
-        function showNotification(message, type = 'info') {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                z-index: 10000;
-                animation: slideIn 0.3s ease-out;
-            `;
-            
-            if (type === 'success') {
-                notification.style.background = '#10b981';
-            } else if (type === 'error') {
-                notification.style.background = '#ef4444';
-            } else {
-                notification.style.background = '#3b82f6';
-            }
-            
-            document.body.appendChild(notification);
-            
-            // Remove after 3 seconds
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-in';
             setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease-in';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', function(event) {
+        const page = event.state?.page || 'home';
+        showPage(page);
+    });
+
+    // Add periodic dashboard refresh when on dashboard
+    setInterval(() => {
+        if (document.getElementById('dashboard').classList.contains('active') && authToken) {
+            console.log('🔄 Auto-refreshing dashboard data...');
+            loadDashboardData();
         }
-
-        // Handle browser back/forward buttons
-        window.addEventListener('popstate', function(event) {
-            const page = event.state?.page || 'home';
-            showPage(page);
-        });
-
-        // Add periodic dashboard refresh when on dashboard
-        setInterval(() => {
-            if (document.getElementById('dashboard').classList.contains('active') && authToken) {
-                console.log('🔄 Auto-refreshing dashboard data...');
-                loadDashboardData();
-            }
-        }, 30000); // Refresh every 30 seconds
-    </script>
+    }, 30000); // Refresh every 30 seconds
+</script>
 </body>
 </html>

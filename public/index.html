@@ -1,120 +1,1207 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BERA PAY - Accept Payments Easily</title>
-    <link rel="stylesheet" href="style.css">
+    <title>BERA PAY - Complete Payment Gateway</title>
+    <style>
+        /* BERA PAY - Modern Payment Gateway Styles */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--background);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+
+        .nav-logo h2 {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Buttons */
+        .btn-primary, .btn-secondary, .btn-large {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--surface);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 100px 0;
+            text-align: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .highlight {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0 8px;
+            border-radius: 4px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 0;
+            background: var(--surface);
+        }
+
+        .steps {
+            display: grid;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .step-number {
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .cta-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--text);
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        /* Dashboard Styles */
+        .dashboard-container {
+            display: flex;
+            min-height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+            padding: 2rem 0;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-item {
+            padding: 1rem 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: var(--background);
+            border-left-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: var(--background);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1.5rem;
+        }
+
+        .card h3 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        /* Transaction List */
+        .transaction-list, .payout-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .transaction-item, .payout-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-item:last-child, .payout-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+            color: var(--success);
+        }
+
+        .transaction-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .status-failed {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        /* API Key Display */
+        .api-key-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .api-key-container code {
+            flex: 1;
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .warning {
+            background: #fef3c7;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--warning);
+        }
+
+        /* Status Check */
+        .status-check {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        /* Result Messages */
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .result.success {
+            background: #d1fae5;
+            color: #059669;
+            border-left: 4px solid var(--success);
+        }
+
+        .result.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border-left: 4px solid var(--error);
+        }
+
+        /* Docs Styles */
+        .docs-container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            gap: 3rem;
+        }
+
+        .docs-sidebar {
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        .docs-nav {
+            list-style: none;
+            position: sticky;
+            top: 100px;
+        }
+
+        .docs-nav li {
+            margin-bottom: 0.5rem;
+        }
+
+        .docs-nav a {
+            color: var(--text);
+            text-decoration: none;
+            padding: 0.5rem 0;
+            display: block;
+            border-left: 3px solid transparent;
+            padding-left: 1rem;
+            transition: all 0.3s;
+        }
+
+        .docs-nav a:hover {
+            color: var(--primary);
+            border-left-color: var(--primary);
+        }
+
+        .docs-content {
+            flex: 1;
+        }
+
+        .docs-section {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .docs-section h2 {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        .docs-section h3 {
+            margin: 1.5rem 0 0.5rem 0;
+            color: var(--text);
+        }
+
+        .docs-intro {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--background);
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .commission-table table {
+            max-width: 400px;
+        }
+
+        /* CTA Box */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .cta-box h3 {
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group small {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .docs-container {
+                flex-direction: column;
+            }
+            
+            .docs-sidebar {
+                width: 100%;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .status-check {
+                flex-direction: column;
+            }
+            
+            .api-key-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Notification Animations */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .text-muted {
+            color: #64748b;
+        }
+    </style>
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
                 <h2>💳 BERA PAY</h2>
             </div>
             <div class="nav-links">
-                <a href="/">Home</a>
-                <a href="/docs">API Docs</a>
-                <a href="/dashboard">Dashboard</a>
-                <a href="#" onclick="openLoginModal()">Login</a>
-                <a href="#" onclick="openRegisterModal()" class="btn-primary">Sign Up Free</a>
+                <a href="#" onclick="showPage('home')" class="active">Home</a>
+                <a href="#" onclick="showPage('docs')">API Docs</a>
+                <a href="#" onclick="showPage('dashboard')">Dashboard</a>
+                <a href="#" id="loginLink" onclick="openLoginModal()">Login</a>
+                <a href="#" id="registerLink" onclick="openRegisterModal()" class="btn-primary">Sign Up Free</a>
+                <a href="#" id="logoutLink" style="display: none;" onclick="logout()" class="btn-secondary">Logout</a>
             </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>Accept Payments Easily with <span class="highlight">BERA PAY</span></h1>
-                <p class="hero-subtitle">Kenya's simplest payment gateway for developers, merchants, and businesses. Integrate M-Pesa STK Push in minutes and start accepting payments.</p>
-                <div class="hero-buttons">
-                    <button class="btn-large" onclick="openRegisterModal()">Start Accepting Payments</button>
-                    <button class="btn-large btn-secondary" onclick="scrollToFeatures()">Learn More</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="features" id="features">
-        <div class="container">
-            <h2 class="section-title">Why Choose BERA PAY?</h2>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">🚀</div>
-                    <h3>Quick Integration</h3>
-                    <p>Integrate M-Pesa payments into your app with just a few lines of code. Get your API key instantly.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💰</div>
-                    <h3>Fair Commission</h3>
-                    <p>Transparent tiered commission: KSh 6 for ≤100, KSh 24 for ≤500, KSh 48 for ≤1000, 5% above.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Secure & Reliable</h3>
-                    <p>Built on PayHero's robust infrastructure. Your funds are safe with enterprise-grade security.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📱</div>
-                    <h3>Instant Payouts</h3>
-                    <p>Withdraw your earnings instantly via M-Pesa B2C. No delays, no hidden fees.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">How It Works</h2>
-            <div class="steps">
-                <div class="step">
-                    <div class="step-number">1</div>
-                    <div class="step-content">
-                        <h3>Sign Up & Get API Key</h3>
-                        <p>Register in 30 seconds and get your unique API key immediately.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">2</div>
-                    <div class="step-content">
-                        <h3>Integrate STK Push</h3>
-                        <p>Add our simple API endpoints to your app or website.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">3</div>
-                    <div class="step-content">
-                        <h3>Accept Payments</h3>
-                        <p>Customers pay via M-Pesa STK Push. Funds go to your BERA PAY balance.</p>
-                    </div>
-                </div>
-                <div class="step">
-                    <div class="step-number">4</div>
-                    <div class="step-content">
-                        <h3>Withdraw Earnings</h3>
-                        <p>Transfer your balance to M-Pesa anytime with instant B2C payouts.</p>
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Accept Payments Easily with <span class="highlight">BERA PAY</span></h1>
+                    <p class="hero-subtitle">Kenya's simplest payment gateway for developers, merchants, and businesses. Integrate M-Pesa STK Push in minutes and start accepting payments.</p>
+                    <div class="hero-buttons">
+                        <button class="btn-large" onclick="openRegisterModal()">Start Accepting Payments</button>
+                        <button class="btn-large btn-secondary" onclick="scrollToFeatures()">Learn More</button>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Start Accepting Payments?</h2>
-                <p>Join hundreds of developers and businesses using BERA PAY</p>
-                <button class="btn-large" onclick="openRegisterModal()">Get Your API Key Now</button>
+        <section class="features" id="features">
+            <div class="container">
+                <h2 class="section-title">Why Choose BERA PAY?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Quick Integration</h3>
+                        <p>Integrate M-Pesa payments into your app with just a few lines of code. Get your API key instantly.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💰</div>
+                        <h3>Fair Commission</h3>
+                        <p>Transparent tiered commission: KSh 6 for ≤100, KSh 24 for ≤500, KSh 48 for ≤1000, 5% above.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔒</div>
+                        <h3>Secure & Reliable</h3>
+                        <p>Built on PayHero's robust infrastructure. Your funds are safe with enterprise-grade security.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Instant Payouts</h3>
+                        <p>Withdraw your earnings instantly via M-Pesa B2C. No delays, no hidden fees.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>Sign Up & Get API Key</h3>
+                            <p>Register in 30 seconds and get your unique API key immediately.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>Integrate STK Push</h3>
+                            <p>Add our simple API endpoints to your app or website.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>Accept Payments</h3>
+                            <p>Customers pay via M-Pesa STK Push. Funds go to your BERA PAY balance.</p>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>Withdraw Earnings</h3>
+                            <p>Transfer your balance to M-Pesa anytime with instant B2C payouts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h2>Ready to Start Accepting Payments?</h2>
+                    <p>Join hundreds of developers and businesses using BERA PAY</p>
+                    <button class="btn-large" onclick="openRegisterModal()">Get Your API Key Now</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2024 BERA PAY. Built with ❤️ by Bera Tech.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div id="dashboard" class="page">
+        <div class="dashboard-container">
+            <div class="sidebar">
+                <div class="sidebar-menu">
+                    <a href="#" class="menu-item active" onclick="showDashboardSection('overview')">📊 Overview</a>
+                    <a href="#" class="menu-item" onclick="showDashboardSection('payments')">💳 Accept Payments</a>
+                    <a href="#" class="menu-item" onclick="showDashboardSection('payouts')">💰 Withdraw Funds</a>
+                    <a href="#" class="menu-item" onclick="showDashboardSection('transactions')">📋 Transactions</a>
+                    <a href="#" class="menu-item" onclick="showDashboardSection('api')">🔑 API Keys</a>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Overview Section -->
+                <div id="overview" class="section active">
+                    <h1>Dashboard Overview</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="balance">KES 0.00</div>
+                            <div class="stat-label">Available Balance</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalTx">0</div>
+                            <div class="stat-label">Total Transactions</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalVolume">KES 0.00</div>
+                            <div class="stat-label">Total Volume</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalCommission">KES 0.00</div>
+                            <div class="stat-label">Total Commission</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <h3>Recent Transactions</h3>
+                            <div id="recentTransactions" class="transaction-list">
+                                <!-- Transactions will be loaded here -->
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Recent Payouts</h3>
+                            <div id="recentPayouts" class="payout-list">
+                                <!-- Payouts will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accept Payments Section -->
+                <div id="payments" class="section">
+                    <h1>Accept Payments</h1>
+                    <div class="card">
+                        <h3>Initiate STK Push Payment</h3>
+                        <form id="stkForm">
+                            <div class="form-group">
+                                <label for="stkPhone">Customer Phone Number</label>
+                                <input type="tel" id="stkPhone" name="phone" placeholder="254712345678" required>
+                                <small>Format: 2547XXXXXXXX</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="stkAmount">Amount (KES)</label>
+                                <input type="number" id="stkAmount" name="amount" placeholder="100" min="1" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="stkReference">Reference (Optional)</label>
+                                <input type="text" id="stkReference" name="reference" placeholder="ORDER-001">
+                                <small>Leave blank for auto-generated reference</small>
+                            </div>
+                            <button type="submit" class="btn-primary">🚀 Initiate Payment</button>
+                        </form>
+                        <div id="stkResult" class="result"></div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Check Payment Status</h3>
+                        <div class="status-check">
+                            <input type="text" id="statusReference" placeholder="Enter transaction reference" class="status-input">
+                            <button onclick="checkTransactionStatus()" class="btn-secondary">Check Status</button>
+                        </div>
+                        <div id="statusResult" class="result"></div>
+                    </div>
+                </div>
+
+                <!-- Withdraw Funds Section -->
+                <div id="payouts" class="section">
+                    <h1>Withdraw Funds</h1>
+                    <div class="card">
+                        <h3>Request Payout</h3>
+                        <div class="balance-info">
+                            <p>Available Balance: <strong id="withdrawBalance">KES 0.00</strong></p>
+                            <p>Minimum Payout: KES 10.00</p>
+                        </div>
+                        <form id="payoutForm">
+                            <div class="form-group">
+                                <label for="payoutPhone">Your M-Pesa Number</label>
+                                <input type="tel" id="payoutPhone" name="phone" placeholder="254712345678" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="payoutAmount">Amount (KES)</label>
+                                <input type="number" id="payoutAmount" name="amount" placeholder="100" min="10" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn-primary">💰 Request Withdrawal</button>
+                        </form>
+                        <div id="payoutResult" class="result"></div>
+                    </div>
+                </div>
+
+                <!-- Transactions Section -->
+                <div id="transactions" class="section">
+                    <h1>Transaction History</h1>
+                    <div class="card">
+                        <div id="transactionsList" class="transactions-table">
+                            <!-- Transactions will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Keys Section -->
+                <div id="api" class="section">
+                    <h1>API Integration</h1>
+                    <div class="card">
+                        <h3>Your API Key</h3>
+                        <div class="api-key-container">
+                            <code id="apiKeyDisplay">Loading...</code>
+                            <button onclick="copyApiKey()" class="btn-secondary">Copy</button>
+                        </div>
+                        <p class="warning">⚠️ Keep your API key secure. Do not share it publicly.</p>
+                    </div>
+
+                    <div class="card">
+                        <h3>API Documentation</h3>
+                        <p>Integrate BERA PAY into your application using our simple REST API.</p>
+                        
+                        <h4>Initiate STK Push</h4>
+                        <pre><code>POST /api/stk-push
+Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json
+
+{
+  "phone_number": "254712345678",
+  "amount": 100,
+  "reference": "ORDER-1234"
+}</code></pre>
+
+                        <h4>Check Transaction Status</h4>
+                        <pre><code>GET /api/transaction-status/:reference
+Authorization: Bearer &lt;your_api_key&gt;</code></pre>
+
+                        <h4>Request Payout</h4>
+                        <pre><code>POST /api/b2c-payout
+Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json
+
+{
+  "phone_number": "254712345678",
+  "amount": 100
+}</code></pre>
+
+                        <a href="#" onclick="showPage('docs')" class="btn-primary">View Full Documentation</a>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2024 BERA PAY. Built with ❤️ by Bera Tech.</p>
+    <!-- Documentation Page -->
+    <div id="docs" class="page">
+        <div class="docs-container">
+            <div class="docs-sidebar">
+                <h3>API Reference</h3>
+                <ul class="docs-nav">
+                    <li><a href="#authentication" onclick="scrollToDocsSection('authentication')">Authentication</a></li>
+                    <li><a href="#stk-push" onclick="scrollToDocsSection('stk-push')">STK Push</a></li>
+                    <li><a href="#transaction-status" onclick="scrollToDocsSection('transaction-status')">Transaction Status</a></li>
+                    <li><a href="#b2c-payout" onclick="scrollToDocsSection('b2c-payout')">B2C Payout</a></li>
+                    <li><a href="#commission" onclick="scrollToDocsSection('commission')">Commission Model</a></li>
+                    <li><a href="#error-codes" onclick="scrollToDocsSection('error-codes')">Error Codes</a></li>
+                </ul>
+            </div>
+
+            <div class="docs-content">
+                <h1>BERA PAY API Documentation</h1>
+                <p class="docs-intro">
+                    Welcome to BERA PAY API documentation. Integrate M-Pesa payments into your application 
+                    with our simple REST API.
+                </p>
+
+                <section id="authentication" class="docs-section">
+                    <h2>Authentication</h2>
+                    <p>All API requests require an API key sent in the Authorization header:</p>
+                    <pre><code>Authorization: Bearer &lt;your_api_key&gt;</code></pre>
+                    <p>Get your API key from the Dashboard after signing up.</p>
+                </section>
+
+                <section id="stk-push" class="docs-section">
+                    <h2>Initiate STK Push</h2>
+                    <p>Initiate an M-Pesa STK Push payment request.</p>
+                    
+                    <h3>Endpoint</h3>
+                    <pre><code>POST /api/stk-push</code></pre>
+
+                    <h3>Headers</h3>
+                    <pre><code>Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json</code></pre>
+
+                    <h3>Request Body</h3>
+                    <pre><code>{
+  "phone_number": "254712345678",
+  "amount": 100,
+  "reference": "ORDER-1234" // Optional
+}</code></pre>
+
+                    <h3>Response</h3>
+                    <pre><code>{
+  "success": true,
+  "message": "STK push initiated successfully",
+  "data": {
+    "reference": "BERA-1701234567890-abc123",
+    "payhero_reference": "PH123456789",
+    "amount": 100,
+    "commission": 6,
+    "net_amount": 94
+  }
+}</code></pre>
+                </section>
+
+                <section id="transaction-status" class="docs-section">
+                    <h2>Check Transaction Status</h2>
+                    <p>Check the status of a transaction using its reference.</p>
+
+                    <h3>Endpoint</h3>
+                    <pre><code>GET /api/transaction-status/:reference</code></pre>
+
+                    <h3>Headers</h3>
+                    <pre><code>Authorization: Bearer &lt;your_api_key&gt;</code></pre>
+
+                    <h3>Response</h3>
+                    <pre><code>{
+  "success": true,
+  "data": {
+    "id": 1,
+    "amount": 100,
+    "commission": 6,
+    "net_amount": 94,
+    "reference": "ORDER-1234",
+    "status": "completed",
+    "created_at": "2024-01-01T12:00:00.000Z"
+  }
+}</code></pre>
+                </section>
+
+                <section id="b2c-payout" class="docs-section">
+                    <h2>B2C Payout</h2>
+                    <p>Withdraw funds to an M-Pesa number via B2C payout.</p>
+
+                    <h3>Endpoint</h3>
+                    <pre><code>POST /api/b2c-payout</code></pre>
+
+                    <h3>Headers</h3>
+                    <pre><code>Authorization: Bearer &lt;your_api_key&gt;
+Content-Type: application/json</code></pre>
+
+                    <h3>Request Body</h3>
+                    <pre><code>{
+  "phone_number": "254712345678",
+  "amount": 100
+}</code></pre>
+
+                    <h3>Response</h3>
+                    <pre><code>{
+  "success": true,
+  "message": "Payout initiated successfully",
+  "data": {
+    "reference": "PAYOUT-1701234567890-xyz789",
+    "payhero_reference": "PH987654321",
+    "amount": 100
+  }
+}</code></pre>
+                </section>
+
+                <section id="commission" class="docs-section">
+                    <h2>Commission Model</h2>
+                    <p>BERA PAY uses a tiered commission structure:</p>
+                    
+                    <div class="commission-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Amount Range (KES)</th>
+                                    <th>Commission (KES)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>≤ 100</td>
+                                    <td>6</td>
+                                </tr>
+                                <tr>
+                                    <td>101 - 500</td>
+                                    <td>24</td>
+                                </tr>
+                                <tr>
+                                    <td>501 - 1000</td>
+                                    <td>48</td>
+                                </tr>
+                                <tr>
+                                    <td>> 1000</td>
+                                    <td>5% of amount</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Example Calculation</h3>
+                    <pre><code>Amount: 150 KES
+Commission: 24 KES
+Developer receives: 126 KES</code></pre>
+                </section>
+
+                <section id="error-codes" class="docs-section">
+                    <h2>Error Codes</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>HTTP Status</th>
+                                <th>Error Code</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>400</td>
+                                <td>INVALID_REQUEST</td>
+                                <td>Missing or invalid parameters</td>
+                            </tr>
+                            <tr>
+                                <td>401</td>
+                                <td>UNAUTHORIZED</td>
+                                <td>Invalid or missing API key</td>
+                            </tr>
+                            <tr>
+                                <td>402</td>
+                                <td>INSUFFICIENT_BALANCE</td>
+                                <td>Insufficient balance for payout</td>
+                            </tr>
+                            <tr>
+                                <td>404</td>
+                                <td>NOT_FOUND</td>
+                                <td>Transaction not found</td>
+                            </tr>
+                            <tr>
+                                <td>500</td>
+                                <td>INTERNAL_ERROR</td>
+                                <td>Server error</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="docs-section">
+                    <h2>Getting Started</h2>
+                    <ol>
+                        <li><a href="#" onclick="openRegisterModal()">Sign up</a> for a BERA PAY account</li>
+                        <li>Get your API key from the Dashboard</li>
+                        <li>Integrate the STK Push endpoint into your application</li>
+                        <li>Test with small amounts first</li>
+                        <li>Go live and start accepting payments!</li>
+                    </ol>
+
+                    <div class="cta-box">
+                        <h3>Ready to integrate?</h3>
+                        <p>Get your API key and start accepting payments in minutes.</p>
+                        <button class="btn-large" onclick="openRegisterModal()">Get Started Free</button>
+                    </div>
+                </section>
+            </div>
         </div>
-    </footer>
+    </div>
 
     <!-- Modals -->
     <div id="registerModal" class="modal">
@@ -163,6 +1250,644 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // BERA PAY Frontend JavaScript - Combined Version
+
+        // Global variables
+        let currentDeveloper = null;
+        let authToken = localStorage.getItem('beraPayToken');
+
+        // DOM Content Loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Checking authentication status...');
+            console.log('Token exists:', !!authToken);
+            
+            // Update navigation based on auth status
+            updateNavigation();
+            
+            // Check if user is trying to access dashboard without auth
+            const urlParams = new URLSearchParams(window.location.search);
+            const page = urlParams.get('page') || 'home';
+            
+            if (page === 'dashboard' && !authToken) {
+                showPage('home');
+                showNotification('Please login to access dashboard', 'error');
+            } else {
+                showPage(page);
+            }
+            
+            // Initialize modals
+            initModals();
+            
+            // Initialize forms
+            initForms();
+        });
+
+        // Page Navigation
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageName).classList.add('active');
+            
+            // Update URL without reload
+            const newUrl = window.location.origin + window.location.pathname + (pageName === 'home' ? '' : `?page=${pageName}`);
+            window.history.pushState({ page: pageName }, '', newUrl);
+            
+            // Update navigation active state
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            event?.target.classList.add('active');
+            
+            // Load dashboard data if needed
+            if (pageName === 'dashboard' && authToken) {
+                loadDashboardData();
+            }
+        }
+
+        // Update navigation based on auth status
+        function updateNavigation() {
+            const loginLink = document.getElementById('loginLink');
+            const registerLink = document.getElementById('registerLink');
+            const logoutLink = document.getElementById('logoutLink');
+            
+            if (authToken) {
+                loginLink.style.display = 'none';
+                registerLink.style.display = 'none';
+                logoutLink.style.display = 'inline-block';
+            } else {
+                loginLink.style.display = 'inline-block';
+                registerLink.style.display = 'inline-block';
+                logoutLink.style.display = 'none';
+            }
+        }
+
+        // Dashboard Section Navigation
+        function showDashboardSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('#dashboard .section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all menu items
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked menu item
+            event.target.classList.add('active');
+        }
+
+        // Docs Section Navigation
+        function scrollToDocsSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Modal Functions
+        function openRegisterModal() {
+            document.getElementById('registerModal').style.display = 'block';
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('registerResult').innerHTML = '';
+            document.getElementById('registerForm').reset();
+        }
+
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginResult').innerHTML = '';
+            document.getElementById('loginForm').reset();
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const registerModal = document.getElementById('registerModal');
+            const loginModal = document.getElementById('loginModal');
+            
+            if (event.target === registerModal) {
+                closeRegisterModal();
+            }
+            if (event.target === loginModal) {
+                closeLoginModal();
+            }
+        }
+
+        // Initialize modals
+        function initModals() {
+            // Registration form
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', handleRegister);
+            }
+            
+            // Login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+
+        // Initialize forms
+        function initForms() {
+            // STK Push form
+            const stkForm = document.getElementById('stkForm');
+            if (stkForm) {
+                stkForm.addEventListener('submit', handleSTKPush);
+            }
+            
+            // Payout form
+            const payoutForm = document.getElementById('payoutForm');
+            if (payoutForm) {
+                payoutForm.addEventListener('submit', handlePayout);
+            }
+        }
+
+        // Registration Handler
+        async function handleRegister(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                phone: formData.get('phone'),
+                password: formData.get('password')
+            };
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.innerHTML = '🔄 Creating Account...';
+                submitBtn.disabled = true;
+                
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('registerResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ Registration successful!<br>
+                        <strong>API Key:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${result.data.api_key}</code><br>
+                        <small style="color: #666;">Save this key securely - it won't be shown again.</small><br><br>
+                        <strong>Auto-login in 3 seconds...</strong>
+                    `;
+                    
+                    // Store token and redirect to dashboard
+                    localStorage.setItem('beraPayToken', result.data.token);
+                    authToken = result.data.token;
+                    updateNavigation();
+                    
+                    setTimeout(() => {
+                        showPage('dashboard');
+                    }, 3000);
+                    
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${result.error}`;
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('registerResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Registration failed. Please try again.';
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Login Handler
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+            
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            try {
+                submitBtn.innerHTML = '🔄 Logging in...';
+                submitBtn.disabled = true;
+                
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const resultDiv = document.getElementById('loginResult');
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✅ Login successful! Redirecting...';
+                    
+                    // Store token and redirect
+                    localStorage.setItem('beraPayToken', result.data.token);
+                    authToken = result.data.token;
+                    updateNavigation();
+                    
+                    setTimeout(() => {
+                        showPage('dashboard');
+                        closeLoginModal();
+                    }, 1000);
+                    
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${result.error}`;
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                const resultDiv = document.getElementById('loginResult');
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Login failed. Please try again.';
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Logout Function
+        function logout() {
+            console.log('🚪 Logging out...');
+            localStorage.removeItem('beraPayToken');
+            authToken = null;
+            updateNavigation();
+            showPage('home');
+            showNotification('Logged out successfully', 'success');
+        }
+
+        // Dashboard Functions
+        async function loadDashboardData() {
+            console.log('📊 Loading dashboard data...');
+            
+            try {
+                const response = await fetch('/api/dashboard', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                console.log('📡 Dashboard response status:', response.status);
+                
+                if (response.status === 401) {
+                    console.log('❌ Token invalid, logging out...');
+                    logout();
+                    return;
+                }
+                
+                const result = await response.json();
+                console.log('📊 Dashboard result:', result);
+                
+                if (result.success) {
+                    currentDeveloper = result.data.developer;
+                    updateDashboardUI(result.data);
+                } else {
+                    console.log('❌ Dashboard API error:', result.error);
+                    if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
+                        logout();
+                    } else {
+                        showNotification('Failed to load dashboard data: ' + result.error, 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('💥 Failed to load dashboard:', error);
+                showNotification('Network error loading dashboard', 'error');
+            }
+        }
+
+        function updateDashboardUI(data) {
+            console.log('🎨 Updating dashboard UI with data:', data);
+            
+            // Update stats
+            if (document.getElementById('balance')) {
+                document.getElementById('balance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
+            }
+            if (document.getElementById('totalTx')) {
+                document.getElementById('totalTx').textContent = (data.stats.total_transactions || 0).toLocaleString();
+            }
+            if (document.getElementById('totalVolume')) {
+                document.getElementById('totalVolume').textContent = `KES ${(data.stats.total_volume || 0).toLocaleString()}`;
+            }
+            if (document.getElementById('totalCommission')) {
+                document.getElementById('totalCommission').textContent = `KES ${(data.stats.total_commission || 0).toLocaleString()}`;
+            }
+            
+            // Update withdraw balance
+            if (document.getElementById('withdrawBalance')) {
+                document.getElementById('withdrawBalance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
+            }
+            
+            // Update API key
+            if (document.getElementById('apiKeyDisplay')) {
+                document.getElementById('apiKeyDisplay').textContent = data.developer.api_key || 'Not available';
+            }
+            
+            // Update recent transactions
+            if (document.getElementById('recentTransactions')) {
+                updateRecentTransactions(data.recent_transactions || []);
+            }
+            
+            // Update recent payouts
+            if (document.getElementById('recentPayouts')) {
+                updateRecentPayouts(data.recent_payouts || []);
+            }
+            
+            console.log('✅ Dashboard UI updated successfully');
+        }
+
+        function updateRecentTransactions(transactions) {
+            const container = document.getElementById('recentTransactions');
+            
+            if (!transactions || transactions.length === 0) {
+                container.innerHTML = '<p class="text-muted">No transactions yet</p>';
+                return;
+            }
+            
+            container.innerHTML = transactions.map(tx => `
+                <div class="transaction-item">
+                    <div>
+                        <div class="transaction-reference">${tx.reference || 'N/A'}</div>
+                        <small>${tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'Unknown date'}</small>
+                    </div>
+                    <div>
+                        <div class="transaction-amount">KES ${tx.amount || 0}</div>
+                        <span class="transaction-status status-${tx.status || 'pending'}">${tx.status || 'pending'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateRecentPayouts(payouts) {
+            const container = document.getElementById('recentPayouts');
+            
+            if (!payouts || payouts.length === 0) {
+                container.innerHTML = '<p class="text-muted">No payouts yet</p>';
+                return;
+            }
+            
+            container.innerHTML = payouts.map(payout => `
+                <div class="payout-item">
+                    <div>
+                        <div class="payout-reference">${payout.reference || 'N/A'}</div>
+                        <small>${payout.createdAt ? new Date(payout.createdAt).toLocaleDateString() : 'Unknown date'}</small>
+                    </div>
+                    <div>
+                        <div class="transaction-amount">KES ${payout.amount || 0}</div>
+                        <span class="transaction-status status-${payout.status || 'pending'}">${payout.status || 'pending'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // STK Push Handler
+        async function handleSTKPush(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                phone_number: formData.get('phone'),
+                amount: parseFloat(formData.get('amount')),
+                reference: formData.get('reference') || undefined
+            };
+            
+            const resultDiv = document.getElementById('stkResult');
+            resultDiv.innerHTML = '🔄 Initiating payment...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('/api/stk-push', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ STK Push initiated!<br>
+                        <strong>Reference:</strong> ${result.data.reference}<br>
+                        <strong>Amount:</strong> KES ${result.data.amount}<br>
+                        <strong>Commission:</strong> KES ${result.data.commission}<br>
+                        <strong>You receive:</strong> KES ${result.data.net_amount}<br>
+                        <small>Customer should check their phone to complete payment</small>
+                    `;
+                    
+                    // Reload dashboard data after a delay
+                    setTimeout(loadDashboardData, 2000);
+                    
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${result.error}`;
+                    
+                    // If unauthorized, logout
+                    if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
+                        setTimeout(logout, 2000);
+                    }
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Failed to initiate payment. Please try again.';
+            }
+        }
+
+        // Payout Handler
+        async function handlePayout(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                phone_number: formData.get('phone'),
+                amount: parseFloat(formData.get('amount'))
+            };
+            
+            const resultDiv = document.getElementById('payoutResult');
+            resultDiv.innerHTML = '🔄 Processing payout...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch('/api/b2c-payout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ Payout initiated!<br>
+                        <strong>Reference:</strong> ${result.data.reference}<br>
+                        <strong>Amount:</strong> KES ${result.data.amount}<br>
+                        <small>Funds should arrive in your M-Pesa shortly</small>
+                    `;
+                    
+                    // Reload dashboard data
+                    setTimeout(loadDashboardData, 2000);
+                    
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${result.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Failed to process payout. Please try again.';
+            }
+        }
+
+        // Check Transaction Status
+        async function checkTransactionStatus() {
+            const reference = document.getElementById('statusReference').value.trim();
+            const resultDiv = document.getElementById('statusResult');
+            
+            if (!reference) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Please enter a transaction reference';
+                return;
+            }
+            
+            resultDiv.innerHTML = '🔄 Checking status...';
+            resultDiv.className = 'result';
+            
+            try {
+                const response = await fetch(`/api/transaction-status/${reference}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const tx = result.data;
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>Reference:</strong> ${tx.reference}<br>
+                        <strong>Amount:</strong> KES ${tx.amount}<br>
+                        <strong>Status:</strong> <span class="transaction-status status-${tx.status}">${tx.status}</span><br>
+                        <strong>Commission:</strong> KES ${tx.commission}<br>
+                        <strong>Net Amount:</strong> KES ${tx.net_amount}<br>
+                        <strong>Date:</strong> ${tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Unknown'}
+                    `;
+                    
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = `❌ ${result.error}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '❌ Failed to check status. Please try again.';
+            }
+        }
+
+        // Copy API Key
+        function copyApiKey() {
+            const apiKey = document.getElementById('apiKeyDisplay').textContent;
+            navigator.clipboard.writeText(apiKey).then(() => {
+                showNotification('API key copied to clipboard!', 'success');
+            });
+        }
+
+        // Utility Functions
+        function scrollToFeatures() {
+            const featuresSection = document.getElementById('features');
+            if (featuresSection) {
+                featuresSection.scrollIntoView({ 
+                    behavior: 'smooth' 
+                });
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            if (type === 'success') {
+                notification.style.background = '#10b981';
+            } else if (type === 'error') {
+                notification.style.background = '#ef4444';
+            } else {
+                notification.style.background = '#3b82f6';
+            }
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function(event) {
+            const page = event.state?.page || 'home';
+            showPage(page);
+        });
+
+        // Add periodic dashboard refresh when on dashboard
+        setInterval(() => {
+            if (document.getElementById('dashboard').classList.contains('active') && authToken) {
+                console.log('🔄 Auto-refreshing dashboard data...');
+                loadDashboardData();
+            }
+        }, 30000); // Refresh every 30 seconds
+    </script>
 </body>
 </html>

@@ -12,10 +12,23 @@ const app = express();
 const port = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'bera-pay-secret-key-change-in-production';
 
-// Rate limiting
+// Fix: Trust proxy for rate limiting
+app.set('trust proxy', 1);
+
+// Rate limiting with proper proxy configuration
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: {
+    success: false,
+    error: 'Too many requests, please try again later.'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  keyGenerator: (req) => {
+    // Use the client's real IP address (considering proxies)
+    return req.ip;
+  }
 });
 
 // Middleware
@@ -704,6 +717,7 @@ async function startServer() {
   app.listen(port, () => {
     console.log('🚀 BERA PAY - Complete Payment Gateway (MongoDB)');
     console.log('📍 Server running on port:', port);
+    console.log('🌐 Environment:', process.env.NODE_ENV || 'development');
     console.log('🗄️ Database:', process.env.MONGODB_URI ? 'MongoDB Atlas' : 'Local MongoDB');
     console.log('🔑 Account ID:', process.env.CHANNEL_ID);
     console.log('💳 Commission Model: Tiered (6, 24, 48, 5%)');

@@ -3,14 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { PayHeroClient } = require('payhero-devkit');
-const mysql = require('mysql2/promise');
+const { MongoClient, ObjectId } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 
 const app = express();
 const port = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'bera-pay-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'bera-pay-secret-key-change-in-production';
 
 // Rate limiting
 const apiLimiter = rateLimit({
@@ -24,24 +24,122 @@ app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use('/api/', apiLimiter);
 
-// Database connection
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'bera_pay'
-};
-
+// MongoDB connection
+const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/bera-pay';
 let db;
 
 async function initDB() {
   try {
-    db = await mysql.createConnection(dbConfig);
-    console.log('✅ Connected to MySQL database');
+    console.log('🔄 Connecting to MongoDB...');
+    const client = new MongoClient(mongoUri);
+    await client.connect();
+    db = client.db();
+    console.log('✅ Connected to MongoDB successfully');
+
+    // Create indexes
+    await db.collection('developers').createIndex({ email: 1 }, { unique: true });
+    await db.collection('developers').createIndex({ api_key: 1 }, { unique: true });
+    await db.collection('transactions').createIndex({ reference: 1 }, { unique: true });
+    await db.collection('transactions').createIndex({ developer_id: 1 });
+    await db.collection('payouts').createIndex({ reference: 1 }, { unique: true });
+    await db.collection('payouts').createIndex({ developer_id: 1 });
+
+    console.log('✅ Database indexes created');
+
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    process.exit(1);
+    console.error('❌ MongoDB connection failed:', error.message);
+    
+    // For development, create a simple in-memory fallback
+    if (process.env.NODE_ENV === 'development') {
+      console.log('⚠️ Using in-memory storage for development');
+      await setupInMemoryDB();
+    } else {
+      console.error('💥 Critical: Database connection required for production');
+      process.exit(1);
+    }
   }
+}
+
+// Simple in-memory database for development fallback
+let inMemoryDB = {
+  developers: [],
+  transactions: [],
+  payouts: [],
+  nextIds: { developers: 1, transactions: 1, payouts: 1 }
+};
+
+async function setupInMemoryDB() {
+  console.log('💾 Using in-memory database (data will reset on server restart)');
+  
+  // Mock MongoDB-like interface
+  db = {
+    collection: (name) => {
+      return {
+        findOne: async (query) => {
+          const collection = inMemoryDB[name];
+          return collection.find(item => {
+            for (const key in query) {
+              if (item[key] !== query[key]) return false;
+            }
+            return true;
+          });
+        },
+        find: (query) => {
+          const collection = inMemoryDB[name];
+          let results = collection;
+          
+          if (query) {
+            results = collection.filter(item => {
+              for (const key in query) {
+                if (item[key] !== query[key]) return false;
+              }
+              return true;
+            });
+          }
+          
+          return {
+            sort: (sort) => {
+              results.sort((a, b) => {
+                for (const key in sort) {
+                  if (a[key] < b[key]) return -1 * sort[key];
+                  if (a[key] > b[key]) return 1 * sort[key];
+                }
+                return 0;
+              });
+              return this;
+            },
+            limit: (limit) => {
+              results = results.slice(0, limit);
+              return this;
+            },
+            toArray: async () => results
+          };
+        },
+        insertOne: async (doc) => {
+          const collection = inMemoryDB[name];
+          const newDoc = { _id: inMemoryDB.nextIds[name]++, ...doc, createdAt: new Date() };
+          collection.push(newDoc);
+          return { insertedId: newDoc._id };
+        },
+        updateOne: async (filter, update) => {
+          const collection = inMemoryDB[name];
+          const item = collection.find(item => {
+            for (const key in filter) {
+              if (item[key] !== filter[key]) return false;
+            }
+            return true;
+          });
+          
+          if (item && update.$set) {
+            Object.assign(item, update.$set, { updatedAt: new Date() });
+            return { modifiedCount: 1 };
+          }
+          return { modifiedCount: 0 };
+        },
+        createIndex: async () => true // Mock index creation
+      };
+    }
+  };
 }
 
 // Initialize PayHero Client
@@ -82,16 +180,13 @@ async function authenticateDeveloper(req, res, next) {
   const apiKey = authHeader.substring(7);
   
   try {
-    const [developers] = await db.execute(
-      'SELECT * FROM developers WHERE api_key = ?',
-      [apiKey]
-    );
+    const developer = await db.collection('developers').findOne({ api_key: apiKey });
     
-    if (developers.length === 0) {
+    if (!developer) {
       return res.status(401).json({ success: false, error: 'Invalid API key' });
     }
     
-    req.developer = developers[0];
+    req.developer = developer;
     next();
   } catch (error) {
     console.error('Authentication error:', error);
@@ -116,18 +211,25 @@ app.post('/api/register', async (req, res) => {
     const apiKey = generateApiKey();
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [result] = await db.execute(
-      'INSERT INTO developers (name, email, phone, api_key) VALUES (?, ?, ?, ?)',
-      [name, email, phone, apiKey]
-    );
+    const result = await db.collection('developers').insertOne({
+      name,
+      email,
+      phone,
+      password: hashedPassword,
+      api_key: apiKey,
+      commission_rate: 0.02,
+      balance: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
 
-    const token = jwt.sign({ developerId: result.insertId }, JWT_SECRET);
+    const token = jwt.sign({ developerId: result.insertedId.toString() }, JWT_SECRET);
 
     res.json({
       success: true,
       message: 'Developer registered successfully',
       data: {
-        developer_id: result.insertId,
+        developer_id: result.insertedId,
         api_key: apiKey,
         token: token
       }
@@ -136,7 +238,7 @@ app.post('/api/register', async (req, res) => {
   } catch (error) {
     console.error('Registration error:', error);
     
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === 11000) {
       return res.status(400).json({
         success: false,
         error: 'Email already registered'
@@ -162,19 +264,15 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    const [developers] = await db.execute(
-      'SELECT * FROM developers WHERE email = ?',
-      [email]
-    );
+    const developer = await db.collection('developers').findOne({ email });
 
-    if (developers.length === 0) {
+    if (!developer) {
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials'
       });
     }
 
-    const developer = developers[0];
     const isValidPassword = await bcrypt.compare(password, developer.password);
 
     if (!isValidPassword) {
@@ -184,20 +282,16 @@ app.post('/api/login', async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ developerId: developer.id }, JWT_SECRET);
+    const token = jwt.sign({ developerId: developer._id.toString() }, JWT_SECRET);
+
+    // Remove password from response
+    const { password: _, ...developerWithoutPassword } = developer;
 
     res.json({
       success: true,
       message: 'Login successful',
       data: {
-        developer: {
-          id: developer.id,
-          name: developer.name,
-          email: developer.email,
-          phone: developer.phone,
-          balance: developer.balance,
-          api_key: developer.api_key
-        },
+        developer: developerWithoutPassword,
         token: token
       }
     });
@@ -250,10 +344,16 @@ app.post('/api/stk-push', authenticateDeveloper, async (req, res) => {
     const transactionRef = reference || `BERA-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Store transaction in database
-    const [transactionResult] = await db.execute(
-      'INSERT INTO transactions (developer_id, amount, commission, net_amount, reference, phone_number, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [developer.id, amountNum, commission, netAmount, transactionRef, formattedPhone, 'pending']
-    );
+    const transactionResult = await db.collection('transactions').insertOne({
+      developer_id: developer._id,
+      amount: amountNum,
+      commission: commission,
+      net_amount: netAmount,
+      reference: transactionRef,
+      phone_number: formattedPhone,
+      status: 'pending',
+      createdAt: new Date()
+    });
 
     // Initiate REAL STK Push
     const stkPayload = {
@@ -265,16 +365,22 @@ app.post('/api/stk-push', authenticateDeveloper, async (req, res) => {
       customer_name: 'Customer'
     };
 
-    console.log('🔄 Initiating REAL STK Push for developer:', developer.id, stkPayload);
+    console.log('🔄 Initiating REAL STK Push for developer:', developer._id, stkPayload);
     
     const response = await client.stkPush(stkPayload);
     
     console.log('✅ STK Push Response:', response);
 
     // Update transaction with PayHero reference
-    await db.execute(
-      'UPDATE transactions SET payhero_reference = ?, status = ? WHERE id = ?',
-      [response.reference, 'initiated', transactionResult.insertId]
+    await db.collection('transactions').updateOne(
+      { _id: transactionResult.insertedId },
+      { 
+        $set: { 
+          payhero_reference: response.reference, 
+          status: 'initiated',
+          updatedAt: new Date()
+        } 
+      }
     );
 
     res.json({
@@ -295,9 +401,14 @@ app.post('/api/stk-push', authenticateDeveloper, async (req, res) => {
     // Update transaction status to failed
     if (req.body.reference) {
       try {
-        await db.execute(
-          'UPDATE transactions SET status = ? WHERE reference = ?',
-          ['failed', req.body.reference]
+        await db.collection('transactions').updateOne(
+          { reference: req.body.reference },
+          { 
+            $set: { 
+              status: 'failed',
+              updatedAt: new Date()
+            } 
+          }
         );
       } catch (dbError) {
         console.error('Failed to update transaction status:', dbError);
@@ -325,19 +436,17 @@ app.get('/api/transaction-status/:reference', authenticateDeveloper, async (req,
     }
 
     // Get transaction from database
-    const [transactions] = await db.execute(
-      'SELECT * FROM transactions WHERE reference = ? AND developer_id = ?',
-      [reference, developer.id]
-    );
+    const transaction = await db.collection('transactions').findOne({ 
+      reference: reference,
+      developer_id: developer._id
+    });
 
-    if (transactions.length === 0) {
+    if (!transaction) {
       return res.status(404).json({
         success: false,
         error: 'Transaction not found'
       });
     }
-
-    const transaction = transactions[0];
 
     // If we have PayHero reference, check actual status
     if (transaction.payhero_reference) {
@@ -348,16 +457,24 @@ app.get('/api/transaction-status/:reference', authenticateDeveloper, async (req,
         
         // Update transaction status based on PayHero response
         if (payheroStatus.status !== transaction.status) {
-          await db.execute(
-            'UPDATE transactions SET status = ? WHERE id = ?',
-            [payheroStatus.status, transaction.id]
+          await db.collection('transactions').updateOne(
+            { _id: transaction._id },
+            { 
+              $set: { 
+                status: payheroStatus.status,
+                updatedAt: new Date()
+              } 
+            }
           );
 
           // If payment is successful, update developer balance
           if (payheroStatus.status === 'completed' && transaction.status !== 'completed') {
-            await db.execute(
-              'UPDATE developers SET balance = balance + ? WHERE id = ?',
-              [transaction.net_amount, developer.id]
+            await db.collection('developers').updateOne(
+              { _id: developer._id },
+              { 
+                $inc: { balance: transaction.net_amount },
+                $set: { updatedAt: new Date() }
+              }
             );
           }
           
@@ -419,10 +536,14 @@ app.post('/api/b2c-payout', authenticateDeveloper, async (req, res) => {
     const payoutRef = `PAYOUT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
     // Create payout record
-    const [payoutResult] = await db.execute(
-      'INSERT INTO payouts (developer_id, amount, phone, reference) VALUES (?, ?, ?, ?)',
-      [developer.id, amountNum, formattedPhone, payoutRef]
-    );
+    const payoutResult = await db.collection('payouts').insertOne({
+      developer_id: developer._id,
+      amount: amountNum,
+      phone: formattedPhone,
+      reference: payoutRef,
+      status: 'pending',
+      createdAt: new Date()
+    });
 
     // Initiate B2C payout via PayHero
     const payoutPayload = {
@@ -440,15 +561,24 @@ app.post('/api/b2c-payout', authenticateDeveloper, async (req, res) => {
     console.log('✅ B2C Payout Response:', response);
 
     // Update payout record
-    await db.execute(
-      'UPDATE payouts SET payhero_reference = ?, status = ? WHERE id = ?',
-      [response.reference, 'processed', payoutResult.insertId]
+    await db.collection('payouts').updateOne(
+      { _id: payoutResult.insertedId },
+      { 
+        $set: { 
+          payhero_reference: response.reference, 
+          status: 'processed',
+          updatedAt: new Date()
+        } 
+      }
     );
 
     // Deduct from developer balance
-    await db.execute(
-      'UPDATE developers SET balance = balance - ? WHERE id = ?',
-      [amountNum, developer.id]
+    await db.collection('developers').updateOne(
+      { _id: developer._id },
+      { 
+        $inc: { balance: -amountNum },
+        $set: { updatedAt: new Date() }
+      }
     );
 
     res.json({
@@ -476,39 +606,41 @@ app.get('/api/dashboard', authenticateDeveloper, async (req, res) => {
     const developer = req.developer;
 
     // Get recent transactions
-    const [transactions] = await db.execute(
-      'SELECT * FROM transactions WHERE developer_id = ? ORDER BY created_at DESC LIMIT 10',
-      [developer.id]
-    );
+    const transactions = await db.collection('transactions')
+      .find({ developer_id: developer._id })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
 
     // Get recent payouts
-    const [payouts] = await db.execute(
-      'SELECT * FROM payouts WHERE developer_id = ? ORDER BY created_at DESC LIMIT 10',
-      [developer.id]
-    );
+    const payouts = await db.collection('payouts')
+      .find({ developer_id: developer._id })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .toArray();
 
     // Calculate stats
-    const [totalResult] = await db.execute(
-      'SELECT COUNT(*) as total_tx, SUM(amount) as total_volume, SUM(commission) as total_commission FROM transactions WHERE developer_id = ? AND status = "completed"',
-      [developer.id]
-    );
+    const completedTransactions = await db.collection('transactions')
+      .find({ 
+        developer_id: developer._id, 
+        status: 'completed' 
+      })
+      .toArray();
+
+    const stats = {
+      total_transactions: completedTransactions.length,
+      total_volume: completedTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+      total_commission: completedTransactions.reduce((sum, tx) => sum + tx.commission, 0)
+    };
+
+    // Remove password from developer object
+    const { password: _, ...developerWithoutPassword } = developer;
 
     res.json({
       success: true,
       data: {
-        developer: {
-          id: developer.id,
-          name: developer.name,
-          email: developer.email,
-          phone: developer.phone,
-          balance: developer.balance,
-          api_key: developer.api_key
-        },
-        stats: {
-          total_transactions: totalResult[0].total_tx || 0,
-          total_volume: totalResult[0].total_volume || 0,
-          total_commission: totalResult[0].total_commission || 0
-        },
+        developer: developerWithoutPassword,
+        stats: stats,
         recent_transactions: transactions,
         recent_payouts: payouts
       }
@@ -527,7 +659,7 @@ app.get('/api/dashboard', authenticateDeveloper, async (req, res) => {
 app.get('/api/health', async (req, res) => {
   try {
     // Test database connection
-    await db.execute('SELECT 1');
+    await db.collection('developers').findOne({});
     
     // Test PayHero connection
     const balance = await client.serviceWalletBalance();
@@ -570,8 +702,9 @@ async function startServer() {
   await initDB();
   
   app.listen(port, () => {
-    console.log('🚀 BERA PAY - Complete Payment Gateway');
+    console.log('🚀 BERA PAY - Complete Payment Gateway (MongoDB)');
     console.log('📍 Server running on port:', port);
+    console.log('🗄️ Database:', process.env.MONGODB_URI ? 'MongoDB Atlas' : 'Local MongoDB');
     console.log('🔑 Account ID:', process.env.CHANNEL_ID);
     console.log('💳 Commission Model: Tiered (6, 24, 48, 5%)');
     console.log('🌐 Access: http://localhost:' + port);

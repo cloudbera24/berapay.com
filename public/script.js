@@ -6,13 +6,22 @@ let authToken = localStorage.getItem('beraPayToken');
 
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Checking authentication status...');
+    console.log('Token exists:', !!authToken);
+    
     // Check authentication for dashboard
     if (window.location.pathname === '/dashboard') {
         if (!authToken) {
+            console.log('❌ No token found, redirecting to home');
             window.location.href = '/';
             return;
         }
+        console.log('✅ Token found, loading dashboard...');
         loadDashboardData();
+    } else if (window.location.pathname === '/' && authToken) {
+        // If user is logged in and visits home, redirect to dashboard
+        console.log('✅ User is logged in, redirecting to dashboard');
+        window.location.href = '/dashboard';
     }
     
     // Initialize modals
@@ -98,7 +107,13 @@ async function handleRegister(e) {
         password: formData.get('password')
     };
     
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
     try {
+        submitBtn.innerHTML = '🔄 Creating Account...';
+        submitBtn.disabled = true;
+        
         const response = await fetch('/api/register', {
             method: 'POST',
             headers: {
@@ -114,8 +129,9 @@ async function handleRegister(e) {
             resultDiv.className = 'result success';
             resultDiv.innerHTML = `
                 ✅ Registration successful!<br>
-                <strong>API Key:</strong> ${result.data.api_key}<br>
-                <small>Save this key securely - it won't be shown again.</small>
+                <strong>API Key:</strong> <code style="background: rgba(0,0,0,0.1); padding: 2px 5px; border-radius: 3px;">${result.data.api_key}</code><br>
+                <small style="color: #666;">Save this key securely - it won't be shown again.</small><br><br>
+                <strong>Auto-login in 3 seconds...</strong>
             `;
             
             // Store token and redirect to dashboard
@@ -127,11 +143,15 @@ async function handleRegister(e) {
         } else {
             resultDiv.className = 'result error';
             resultDiv.textContent = `❌ ${result.error}`;
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     } catch (error) {
         const resultDiv = document.getElementById('registerResult');
         resultDiv.className = 'result error';
         resultDiv.textContent = '❌ Registration failed. Please try again.';
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
@@ -145,7 +165,13 @@ async function handleLogin(e) {
         password: formData.get('password')
     };
     
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    
     try {
+        submitBtn.innerHTML = '🔄 Logging in...';
+        submitBtn.disabled = true;
+        
         const response = await fetch('/api/login', {
             method: 'POST',
             headers: {
@@ -163,6 +189,8 @@ async function handleLogin(e) {
             
             // Store token and redirect
             localStorage.setItem('beraPayToken', result.data.token);
+            console.log('🔐 Token stored:', result.data.token.substring(0, 20) + '...');
+            
             setTimeout(() => {
                 window.location.href = '/dashboard';
             }, 1000);
@@ -170,22 +198,29 @@ async function handleLogin(e) {
         } else {
             resultDiv.className = 'result error';
             resultDiv.textContent = `❌ ${result.error}`;
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
     } catch (error) {
         const resultDiv = document.getElementById('loginResult');
         resultDiv.className = 'result error';
         resultDiv.textContent = '❌ Login failed. Please try again.';
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
     }
 }
 
 // Logout Function
 function logout() {
+    console.log('🚪 Logging out...');
     localStorage.removeItem('beraPayToken');
     window.location.href = '/';
 }
 
 // Dashboard Functions
 async function loadDashboardData() {
+    console.log('📊 Loading dashboard data...');
+    
     try {
         const response = await fetch('/api/dashboard', {
             headers: {
@@ -193,45 +228,78 @@ async function loadDashboardData() {
             }
         });
         
+        console.log('📡 Dashboard response status:', response.status);
+        
+        if (response.status === 401) {
+            console.log('❌ Token invalid, logging out...');
+            logout();
+            return;
+        }
+        
         const result = await response.json();
+        console.log('📊 Dashboard result:', result);
         
         if (result.success) {
             currentDeveloper = result.data.developer;
             updateDashboardUI(result.data);
         } else {
-            // Token might be invalid
-            logout();
+            console.log('❌ Dashboard API error:', result.error);
+            if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
+                logout();
+            } else {
+                showNotification('Failed to load dashboard data: ' + result.error, 'error');
+            }
         }
     } catch (error) {
-        console.error('Failed to load dashboard:', error);
-        showNotification('Failed to load dashboard data', 'error');
+        console.error('💥 Failed to load dashboard:', error);
+        showNotification('Network error loading dashboard', 'error');
     }
 }
 
 function updateDashboardUI(data) {
+    console.log('🎨 Updating dashboard UI with data:', data);
+    
     // Update stats
-    document.getElementById('balance').textContent = `KES ${data.developer.balance.toLocaleString()}`;
-    document.getElementById('totalTx').textContent = data.stats.total_transactions.toLocaleString();
-    document.getElementById('totalVolume').textContent = `KES ${data.stats.total_volume.toLocaleString()}`;
-    document.getElementById('totalCommission').textContent = `KES ${data.stats.total_commission.toLocaleString()}`;
+    if (document.getElementById('balance')) {
+        document.getElementById('balance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
+    }
+    if (document.getElementById('totalTx')) {
+        document.getElementById('totalTx').textContent = (data.stats.total_transactions || 0).toLocaleString();
+    }
+    if (document.getElementById('totalVolume')) {
+        document.getElementById('totalVolume').textContent = `KES ${(data.stats.total_volume || 0).toLocaleString()}`;
+    }
+    if (document.getElementById('totalCommission')) {
+        document.getElementById('totalCommission').textContent = `KES ${(data.stats.total_commission || 0).toLocaleString()}`;
+    }
     
     // Update withdraw balance
-    document.getElementById('withdrawBalance').textContent = `KES ${data.developer.balance.toLocaleString()}`;
+    if (document.getElementById('withdrawBalance')) {
+        document.getElementById('withdrawBalance').textContent = `KES ${(data.developer.balance || 0).toLocaleString()}`;
+    }
     
     // Update API key
-    document.getElementById('apiKeyDisplay').textContent = data.developer.api_key;
+    if (document.getElementById('apiKeyDisplay')) {
+        document.getElementById('apiKeyDisplay').textContent = data.developer.api_key || 'Not available';
+    }
     
     // Update recent transactions
-    updateRecentTransactions(data.recent_transactions);
+    if (document.getElementById('recentTransactions')) {
+        updateRecentTransactions(data.recent_transactions || []);
+    }
     
     // Update recent payouts
-    updateRecentPayouts(data.recent_payouts);
+    if (document.getElementById('recentPayouts')) {
+        updateRecentPayouts(data.recent_payouts || []);
+    }
+    
+    console.log('✅ Dashboard UI updated successfully');
 }
 
 function updateRecentTransactions(transactions) {
     const container = document.getElementById('recentTransactions');
     
-    if (transactions.length === 0) {
+    if (!transactions || transactions.length === 0) {
         container.innerHTML = '<p class="text-muted">No transactions yet</p>';
         return;
     }
@@ -239,12 +307,12 @@ function updateRecentTransactions(transactions) {
     container.innerHTML = transactions.map(tx => `
         <div class="transaction-item">
             <div>
-                <div class="transaction-reference">${tx.reference}</div>
-                <small>${new Date(tx.created_at).toLocaleDateString()}</small>
+                <div class="transaction-reference">${tx.reference || 'N/A'}</div>
+                <small>${tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : 'Unknown date'}</small>
             </div>
             <div>
-                <div class="transaction-amount">KES ${tx.amount}</div>
-                <span class="transaction-status status-${tx.status}">${tx.status}</span>
+                <div class="transaction-amount">KES ${tx.amount || 0}</div>
+                <span class="transaction-status status-${tx.status || 'pending'}">${tx.status || 'pending'}</span>
             </div>
         </div>
     `).join('');
@@ -253,7 +321,7 @@ function updateRecentTransactions(transactions) {
 function updateRecentPayouts(payouts) {
     const container = document.getElementById('recentPayouts');
     
-    if (payouts.length === 0) {
+    if (!payouts || payouts.length === 0) {
         container.innerHTML = '<p class="text-muted">No payouts yet</p>';
         return;
     }
@@ -261,12 +329,12 @@ function updateRecentPayouts(payouts) {
     container.innerHTML = payouts.map(payout => `
         <div class="payout-item">
             <div>
-                <div class="payout-reference">${payout.reference}</div>
-                <small>${new Date(payout.created_at).toLocaleDateString()}</small>
+                <div class="payout-reference">${payout.reference || 'N/A'}</div>
+                <small>${payout.createdAt ? new Date(payout.createdAt).toLocaleDateString() : 'Unknown date'}</small>
             </div>
             <div>
-                <div class="transaction-amount">KES ${payout.amount}</div>
-                <span class="transaction-status status-${payout.status}">${payout.status}</span>
+                <div class="transaction-amount">KES ${payout.amount || 0}</div>
+                <span class="transaction-status status-${payout.status || 'pending'}">${payout.status || 'pending'}</span>
             </div>
         </div>
     `).join('');
@@ -316,6 +384,11 @@ async function handleSTKPush(e) {
         } else {
             resultDiv.className = 'result error';
             resultDiv.textContent = `❌ ${result.error}`;
+            
+            // If unauthorized, logout
+            if (result.error.includes('Invalid API key') || result.error.includes('unauthorized')) {
+                setTimeout(logout, 2000);
+            }
         }
     } catch (error) {
         resultDiv.className = 'result error';
@@ -403,7 +476,7 @@ async function checkTransactionStatus() {
                 <strong>Status:</strong> <span class="transaction-status status-${tx.status}">${tx.status}</span><br>
                 <strong>Commission:</strong> KES ${tx.commission}<br>
                 <strong>Net Amount:</strong> KES ${tx.net_amount}<br>
-                <strong>Date:</strong> ${new Date(tx.created_at).toLocaleString()}
+                <strong>Date:</strong> ${tx.createdAt ? new Date(tx.createdAt).toLocaleString() : 'Unknown'}
             `;
             
         } else {
@@ -481,7 +554,9 @@ function showNotification(message, type = 'info') {
     setTimeout(() => {
         notification.style.animation = 'slideOut 0.3s ease-in';
         setTimeout(() => {
-            document.body.removeChild(notification);
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
         }, 300);
     }, 3000);
 }
@@ -502,5 +577,45 @@ style.textContent = `
     .text-muted {
         color: #64748b;
     }
+    
+    .transaction-status {
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .status-completed {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .status-failed {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .status-initiated {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+    
+    .status-processed {
+        background: #ddd6fe;
+        color: #7c3aed;
+    }
 `;
 document.head.appendChild(style);
+
+// Add periodic dashboard refresh when on dashboard
+if (window.location.pathname === '/dashboard') {
+    setInterval(() => {
+        console.log('🔄 Auto-refreshing dashboard data...');
+        loadDashboardData();
+    }, 30000); // Refresh every 30 seconds
+}

@@ -1,1 +1,168 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BERA PAY - Accept Payments Easily</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>💳 BERA PAY</h2>
+            </div>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/docs">API Docs</a>
+                <a href="/dashboard">Dashboard</a>
+                <a href="#" onclick="openLoginModal()">Login</a>
+                <a href="#" onclick="openRegisterModal()" class="btn-primary">Sign Up Free</a>
+            </div>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Accept Payments Easily with <span class="highlight">BERA PAY</span></h1>
+                <p class="hero-subtitle">Kenya's simplest payment gateway for developers, merchants, and businesses. Integrate M-Pesa STK Push in minutes and start accepting payments.</p>
+                <div class="hero-buttons">
+                    <button class="btn-large" onclick="openRegisterModal()">Start Accepting Payments</button>
+                    <button class="btn-large btn-secondary" onclick="scrollToFeatures()">Learn More</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose BERA PAY?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Quick Integration</h3>
+                    <p>Integrate M-Pesa payments into your app with just a few lines of code. Get your API key instantly.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3>Fair Commission</h3>
+                    <p>Transparent tiered commission: KSh 6 for ≤100, KSh 24 for ≤500, KSh 48 for ≤1000, 5% above.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Secure & Reliable</h3>
+                    <p>Built on PayHero's robust infrastructure. Your funds are safe with enterprise-grade security.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <h3>Instant Payouts</h3>
+                    <p>Withdraw your earnings instantly via M-Pesa B2C. No delays, no hidden fees.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Sign Up & Get API Key</h3>
+                        <p>Register in 30 seconds and get your unique API key immediately.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Integrate STK Push</h3>
+                        <p>Add our simple API endpoints to your app or website.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Accept Payments</h3>
+                        <p>Customers pay via M-Pesa STK Push. Funds go to your BERA PAY balance.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Withdraw Earnings</h3>
+                        <p>Transfer your balance to M-Pesa anytime with instant B2C payouts.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Start Accepting Payments?</h2>
+                <p>Join hundreds of developers and businesses using BERA PAY</p>
+                <button class="btn-large" onclick="openRegisterModal()">Get Your API Key Now</button>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BERA PAY. Built with ❤️ by Bera Tech.</p>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRegisterModal()">&times;</span>
+            <h2>Create Your BERA PAY Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="regName">Full Name</label>
+                    <input type="text" id="regName" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email Address</label>
+                    <input type="email" id="regEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone">Phone Number</label>
+                    <input type="tel" id="regPhone" name="phone" placeholder="254712345678" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPassword">Password</label>
+                    <input type="password" id="regPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Create Account</button>
+            </form>
+            <div id="registerResult" class="result"></div>
+        </div>
+    </div>
+
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLoginModal()">&times;</span>
+            <h2>Login to BERA PAY</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email Address</label>
+                    <input type="email" id="loginEmail" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <div id="loginResult" class="result"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

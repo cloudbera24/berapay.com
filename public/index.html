@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bera Tech - Premium Subscriptions</title>
+    <title>Bera Tech - Premium Subscriptions & Donations</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
@@ -42,6 +42,30 @@
                         <span class="stat-number">Instant</span>
                         <span class="stat-label">Activation</span>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Donation Section -->
+    <section class="donation-section">
+        <div class="container">
+            <div class="donation-card">
+                <div class="donation-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="donation-content">
+                    <h2>Support Our Development</h2>
+                    <p>Your donations help us improve our services and bring you more amazing features. Every shilling counts!</p>
+                    <div class="donation-options">
+                        <button class="donation-option" data-amount="1">KES 1</button>
+                        <button class="donation-option" data-amount="50">KES 50</button>
+                        <button class="donation-option" data-amount="100">KES 100</button>
+                        <button class="donation-option" data-amount="500">KES 500</button>
+                    </div>
+                    <button class="btn-donate" id="openDonationModal">
+                        <i class="fas fa-gift"></i> Make a Donation
+                    </button>
                 </div>
             </div>
         </div>
@@ -97,6 +121,54 @@
                 </form>
                 
                 <div id="paymentResult" class="payment-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Donation Modal -->
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-heart"></i> Support Bera Tech</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="donationForm">
+                    <div class="donation-message">
+                        <p>Your support helps us continue providing excellent services. Thank you for considering a donation!</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="donationAmount">Donation Amount (KES)</label>
+                        <input type="number" id="donationAmount" name="donationAmount" required min="1" max="150000" placeholder="Enter amount (min KES 1)">
+                        <small>Any amount from KES 1 to KES 150,000</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="donorName">Your Name (Optional)</label>
+                        <input type="text" id="donorName" name="donorName" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="donorMessage">Message (Optional)</label>
+                        <textarea id="donorMessage" name="donorMessage" placeholder="Leave an encouraging message..." rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="donorPhone">M-Pesa Phone Number</label>
+                        <input type="tel" id="donorPhone" name="donorPhone" required placeholder="2547XXXXXXXX">
+                        <small>Enter your M-Pesa registered number</small>
+                    </div>
+                    
+                    <button type="submit" class="btn-donate-submit" id="donateButton">
+                        <span class="btn-text"><i class="fas fa-heart"></i> Donate Now</span>
+                        <span class="btn-loading" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                        </span>
+                    </button>
+                </form>
+                
+                <div id="donationResult" class="payment-result"></div>
             </div>
         </div>
     </div>

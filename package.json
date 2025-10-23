@@ -1,7 +1,7 @@
 {
-  "name": "bera-tech-subscriptions",
+  "name": "bera-pay-platform",
   "version": "1.0.0",
-  "description": "Premium subscription payment gateway",
+  "description": "PayHero Kenya Clone with WhatsApp OTP",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -12,17 +12,14 @@
     "cors": "^2.8.5",
     "body-parser": "^1.20.2",
     "dotenv": "^16.3.1",
-    "payhero-devkit": "^1.0.0"
+    "axios": "^1.5.0",
+    "uuid": "^9.0.0",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.0"
   },
-  "keywords": [
-    "subscriptions",
-    "payments",
-    "mpesa",
-    "kenya"
-  ],
+  "keywords": ["payhero", "whatsapp", "otp", "kenya"],
   "author": "Bera Tech",
   "license": "MIT"
 }

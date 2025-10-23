@@ -10,7 +10,7 @@ const port = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 
@@ -19,20 +19,41 @@ const client = new PayHeroClient({
   authToken: process.env.AUTH_TOKEN
 });
 
-// Subscription plans data
+// Enhanced Subscription plans data with categories
 const subscriptionPlans = {
-  'netflix': { name: 'Netflix Premium', price: 220, duration: '1 Month', features: ['4K Ultra HD', '4 Screens Simultaneous', 'Unlimited Movies & TV Shows'] },
-  'spotify': { name: 'Spotify Premium', price: 180, duration: '1 Month', features: ['Ad-free Music', 'Download Songs', 'High Quality Audio'] },
-  'showmax': { name: 'Showmax Pro', price: 150, duration: '1 Month', features: ['Live Sports', 'Showmax Originals', 'Multiple Devices'] },
-  'primevideo': { name: 'Prime Video', price: 200, duration: '1 Month', features: ['4K Streaming', 'Amazon Originals', 'Offline Viewing'] },
-  'expressvpn': { name: 'ExpressVPN', price: 150, duration: '1 Month', features: ['Lightning Fast', 'Secure Browsing', 'Global Servers'] },
-  'nordvpn': { name: 'NordVPN', price: 250, duration: '1 Month', features: ['Military Grade Encryption', '6 Devices', 'No Logs Policy'] },
-  'surfshark': { name: 'Surfshark VPN', price: 300, duration: '1 Month', features: ['Unlimited Devices', 'CleanWeb', 'Whitelister'] },
-  'whatsappbot': { name: 'WhatsApp Bot', price: 60, duration: 'Lifetime', features: ['Auto Replies', 'Bulk Messaging', '24/7 Support'] },
-  'hdopremium': { name: 'HDO Box Premium', price: 150, duration: '1 Month', features: ['No Ads', 'All Content Unlocked', 'HD Streaming'] },
-  'unlimitedpanels': { name: 'Unlimited Panels', price: 100, duration: 'Lifetime', features: ['All Services', 'Automatic Updates', 'Premium Support'] },
-  'canvapro': { name: 'Canva Pro', price: 80, duration: '1 Month', features: ['Premium Templates', 'Background Remover', 'Magic Resize'] },
-  'capcutpro': { name: 'CapCut Pro', price: 300, duration: '1 Month', features: ['Premium Effects', 'No Watermark', 'Cloud Storage'] }
+  'streaming': {
+    category: 'Streaming Services',
+    icon: 'fas fa-play-circle',
+    color: '#FF6B6B',
+    plans: {
+      'netflix': { name: 'Netflix Premium', price: 220, duration: '1 Month', features: ['4K Ultra HD', '4 Screens', 'Unlimited Content'], popular: true },
+      'spotify': { name: 'Spotify Premium', price: 180, duration: '1 Month', features: ['Ad-free Music', 'Offline Downloads', 'High Quality Audio'] },
+      'showmax': { name: 'Showmax Pro', price: 150, duration: '1 Month', features: ['Live Sports', 'Showmax Originals', 'Multiple Devices'] },
+      'primevideo': { name: 'Prime Video', price: 200, duration: '1 Month', features: ['4K Streaming', 'Amazon Originals', 'Offline Viewing'] },
+      'hdopremium': { name: 'HDO Box Premium', price: 150, duration: '1 Month', features: ['No Ads', 'All Content Unlocked', 'HD Streaming'] }
+    }
+  },
+  'security': {
+    category: 'VPN & Security',
+    icon: 'fas fa-shield-alt',
+    color: '#4ECDC4',
+    plans: {
+      'expressvpn': { name: 'ExpressVPN', price: 150, duration: '1 Month', features: ['Lightning Fast', 'Secure Browsing', 'Global Servers'] },
+      'nordvpn': { name: 'NordVPN', price: 250, duration: '1 Month', features: ['Military Encryption', '6 Devices', 'No Logs Policy'], popular: true },
+      'surfshark': { name: 'Surfshark VPN', price: 300, duration: '1 Month', features: ['Unlimited Devices', 'CleanWeb', 'Whitelister'] }
+    }
+  },
+  'productivity': {
+    category: 'Productivity Tools',
+    icon: 'fas fa-briefcase',
+    color: '#45B7D1',
+    plans: {
+      'whatsappbot': { name: 'WhatsApp Bot', price: 60, duration: 'Lifetime', features: ['Auto Replies', 'Bulk Messaging', '24/7 Support'] },
+      'unlimitedpanels': { name: 'Unlimited Panels', price: 100, duration: 'Lifetime', features: ['All Services', 'Auto Updates', 'Premium Support'] },
+      'canvapro': { name: 'Canva Pro', price: 80, duration: '1 Month', features: ['Premium Templates', 'Background Remover', 'Magic Resize'] },
+      'capcutpro': { name: 'CapCut Pro', price: 300, duration: '1 Month', features: ['Premium Effects', 'No Watermark', 'Cloud Storage'], popular: true }
+    }
+  }
 };
 
 // Routes
@@ -41,22 +62,32 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/plans', (req, res) => {
-  res.json({ success: true, plans: subscriptionPlans });
+  res.json({ success: true, categories: subscriptionPlans });
 });
 
 app.post('/api/initiate-payment', async (req, res) => {
   try {
     const { planId, phoneNumber, customerName, email } = req.body;
 
-    if (!subscriptionPlans[planId]) {
+    // Find plan in categories
+    let plan = null;
+    let categoryName = '';
+    
+    for (const [category, data] of Object.entries(subscriptionPlans)) {
+      if (data.plans[planId]) {
+        plan = data.plans[planId];
+        categoryName = data.category;
+        break;
+      }
+    }
+
+    if (!plan) {
       return res.status(400).json({
         success: false,
         error: 'Invalid subscription plan'
       });
     }
 
-    const plan = subscriptionPlans[planId];
-    
     // Format phone number
     let formattedPhone = phoneNumber.trim();
     if (formattedPhone.startsWith('0')) {
@@ -65,10 +96,10 @@ app.post('/api/initiate-payment', async (req, res) => {
       formattedPhone = formattedPhone.substring(1);
     }
 
-    if (!formattedPhone.startsWith('254')) {
+    if (!formattedPhone.startsWith('254') || formattedPhone.length !== 12) {
       return res.status(400).json({
         success: false,
-        error: 'Phone number must be in format 2547XXXXXXXX'
+        error: 'Phone number must be in format 2547XXXXXXXX (12 digits)'
       });
     }
 
@@ -87,19 +118,6 @@ app.post('/api/initiate-payment', async (req, res) => {
 
     console.log('🔄 Initiating payment for:', plan.name);
     const response = await client.stkPush(stkPayload);
-    
-    // Store transaction details (in production, use a database)
-    const transaction = {
-      reference,
-      planId,
-      planName: plan.name,
-      amount: plan.price,
-      customerName,
-      email,
-      phone: formattedPhone,
-      status: 'initiated',
-      timestamp: new Date()
-    };
 
     res.json({
       success: true,
@@ -107,7 +125,9 @@ app.post('/api/initiate-payment', async (req, res) => {
       data: {
         reference,
         plan: plan.name,
+        category: categoryName,
         amount: plan.price,
+        duration: plan.duration,
         checkoutMessage: `You will receive an M-Pesa prompt to pay KES ${plan.price} for ${plan.name}`
       }
     });
@@ -121,7 +141,7 @@ app.post('/api/initiate-payment', async (req, res) => {
   }
 });
 
-// Donation Endpoint
+// Enhanced Donation Endpoint
 app.post('/api/donate', async (req, res) => {
   try {
     const { phoneNumber, amount, customerName, message } = req.body;
@@ -141,10 +161,10 @@ app.post('/api/donate', async (req, res) => {
       formattedPhone = formattedPhone.substring(1);
     }
 
-    if (!formattedPhone.startsWith('254')) {
+    if (!formattedPhone.startsWith('254') || formattedPhone.length !== 12) {
       return res.status(400).json({
         success: false,
-        error: 'Phone number must be in format 2547XXXXXXXX'
+        error: 'Phone number must be in format 2547XXXXXXXX (12 digits)'
       });
     }
 
@@ -165,7 +185,7 @@ app.post('/api/donate', async (req, res) => {
     }
 
     // Generate unique reference
-    const reference = `DONATION-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const reference = `DONATION-${Date.now()}`;
 
     // Initiate STK Push for donation
     const stkPayload = {
@@ -174,11 +194,10 @@ app.post('/api/donate', async (req, res) => {
       provider: 'm-pesa',
       channel_id: process.env.CHANNEL_ID,
       external_reference: reference,
-      customer_name: customerName || 'Bera Tech Supporter',
-      description: message || 'Thank you for your support!'
+      customer_name: customerName || 'Bera Tech Supporter'
     };
 
-    console.log('🔄 Initiating donation:', { amount: donationAmount, phone: formattedPhone });
+    console.log('💝 Processing donation:', { amount: donationAmount, phone: formattedPhone });
     const response = await client.stkPush(stkPayload);
 
     res.json({
@@ -188,7 +207,8 @@ app.post('/api/donate', async (req, res) => {
         reference,
         amount: donationAmount,
         checkoutMessage: `You will receive an M-Pesa prompt to donate KES ${donationAmount}`,
-        thankYouMessage: 'Thank you for supporting Bera Tech! Your contribution helps us improve our services.'
+        thankYouMessage: 'Thank you for supporting Bera Tech! Your contribution helps us improve our services.',
+        isDonation: true
       }
     });
 
@@ -208,14 +228,23 @@ app.get('/api/check-payment/:reference', async (req, res) => {
     const status = await client.transactionStatus(reference);
     
     if (status.status === 'success') {
-      // Payment successful - redirect to WhatsApp
-      const whatsappUrl = `https://wa.me/254743982206?text=Payment%20Successful%20for%20${reference}.%20Please%20provide%20my%20account%20details.`;
+      const isDonation = reference.startsWith('DONATION');
+      let whatsappUrl = '';
+      
+      if (isDonation) {
+        whatsappUrl = `https://wa.me/254743982206?text=Thank%20you%20for%20your%20donation%20${reference}!%20Your%20support%20means%20a%20lot.`;
+      } else {
+        whatsappUrl = `https://wa.me/254743982206?text=Payment%20Successful%20for%20${reference}.%20Please%20provide%20my%20account%20details.`;
+      }
       
       return res.json({
         success: true,
         status: 'success',
         whatsappUrl: whatsappUrl,
-        message: 'Payment confirmed! Redirecting to WhatsApp for account details...'
+        isDonation: isDonation,
+        message: isDonation ? 
+          'Donation confirmed! Thank you for your support.' : 
+          'Payment confirmed! Redirecting to WhatsApp for account details...'
       });
     }
     
@@ -238,29 +267,35 @@ app.get('/success', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'success.html'));
 });
 
-// Health check
+// Health check endpoint
 app.get('/api/health', async (req, res) => {
   try {
     const balance = await client.serviceWalletBalance();
     res.json({
       success: true,
-      message: 'Bera Tech Subscription Service is running',
-      account_id: process.env.CHANNEL_ID,
-      timestamp: new Date().toISOString()
+      message: 'Bera Tech Premium Service is running optimally',
+      data: {
+        account_id: process.env.CHANNEL_ID,
+        timestamp: new Date().toISOString(),
+        status: 'operational',
+        uptime: process.uptime()
+      }
     });
   } catch (error) {
-    res.json({
+    res.status(503).json({
       success: false,
-      message: 'Service running but PayHero connection failed',
+      message: 'Service experiencing connectivity issues',
       error: error.message
     });
   }
 });
 
+// Start server
 app.listen(port, () => {
-  console.log('🚀 Bera Tech Subscription Service Started');
+  console.log('🚀 Bera Tech Premium Service Started');
   console.log('📍 Port:', port);
   console.log('🔑 Account ID:', process.env.CHANNEL_ID);
   console.log('🌐 URL: http://localhost:' + port);
-  console.log('💝 Donation feature: ENABLED');
+  console.log('💝 Donation system: ACTIVE');
+  console.log('🎯 Categories: Streaming, Security, Productivity');
 });

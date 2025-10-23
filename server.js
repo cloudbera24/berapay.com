@@ -121,6 +121,86 @@ app.post('/api/initiate-payment', async (req, res) => {
   }
 });
 
+// Donation Endpoint
+app.post('/api/donate', async (req, res) => {
+  try {
+    const { phoneNumber, amount, customerName, message } = req.body;
+
+    if (!phoneNumber || !amount) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number and amount are required'
+      });
+    }
+
+    // Format phone number
+    let formattedPhone = phoneNumber.trim();
+    if (formattedPhone.startsWith('0')) {
+      formattedPhone = '254' + formattedPhone.substring(1);
+    } else if (formattedPhone.startsWith('+')) {
+      formattedPhone = formattedPhone.substring(1);
+    }
+
+    if (!formattedPhone.startsWith('254')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Phone number must be in format 2547XXXXXXXX'
+      });
+    }
+
+    // Validate amount
+    const donationAmount = parseFloat(amount);
+    if (donationAmount < 1) {
+      return res.status(400).json({
+        success: false,
+        error: 'Minimum donation amount is KES 1'
+      });
+    }
+
+    if (donationAmount > 150000) {
+      return res.status(400).json({
+        success: false,
+        error: 'Maximum donation amount is KES 150,000'
+      });
+    }
+
+    // Generate unique reference
+    const reference = `DONATION-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
+    // Initiate STK Push for donation
+    const stkPayload = {
+      phone_number: formattedPhone,
+      amount: donationAmount,
+      provider: 'm-pesa',
+      channel_id: process.env.CHANNEL_ID,
+      external_reference: reference,
+      customer_name: customerName || 'Bera Tech Supporter',
+      description: message || 'Thank you for your support!'
+    };
+
+    console.log('🔄 Initiating donation:', { amount: donationAmount, phone: formattedPhone });
+    const response = await client.stkPush(stkPayload);
+
+    res.json({
+      success: true,
+      message: `Donation of KES ${donationAmount} initiated successfully`,
+      data: {
+        reference,
+        amount: donationAmount,
+        checkoutMessage: `You will receive an M-Pesa prompt to donate KES ${donationAmount}`,
+        thankYouMessage: 'Thank you for supporting Bera Tech! Your contribution helps us improve our services.'
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Donation initiation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to process donation'
+    });
+  }
+});
+
 app.get('/api/check-payment/:reference', async (req, res) => {
   try {
     const { reference } = req.params;
@@ -182,4 +262,5 @@ app.listen(port, () => {
   console.log('📍 Port:', port);
   console.log('🔑 Account ID:', process.env.CHANNEL_ID);
   console.log('🌐 URL: http://localhost:' + port);
+  console.log('💝 Donation feature: ENABLED');
 });

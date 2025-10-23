@@ -3,119 +3,215 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bera Tech - Premium Subscriptions & Donations</title>
+    <title>Bera Tech | Premium Digital Subscriptions</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <div class="nav-brand">
-                <h1><i class="fas fa-crown"></i> Bera Tech</h1>
-                <span class="badge">Premium Subscriptions</span>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <span class="logo-text">Bera Tech</span>
             </div>
-            <div class="nav-contact">
-                <a href="https://wa.me/254743982206" class="whatsapp-btn">
-                    <i class="fab fa-whatsapp"></i> Support
+            
+            <div class="nav-links">
+                <a href="#services" class="nav-link">Services</a>
+                <a href="#donate" class="nav-link">Support Us</a>
+                <a href="#features" class="nav-link">Why Choose Us</a>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="https://wa.me/254743982206" class="support-btn">
+                    <i class="fab fa-whatsapp"></i>
+                    <span>24/7 Support</span>
                 </a>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
 
     <!-- Hero Section -->
     <section class="hero">
+        <div class="hero-background">
+            <div class="hero-glow"></div>
+        </div>
         <div class="container">
             <div class="hero-content">
-                <h1>Premium Subscriptions Made Affordable</h1>
-                <p>Get access to Netflix, Spotify, VPNs, and more at unbeatable prices. Instant activation after payment.</p>
+                <div class="hero-badge">
+                    <i class="fas fa-bolt"></i>
+                    <span>Premium Digital Experience</span>
+                </div>
+                <h1 class="hero-title">
+                    Elevate Your
+                    <span class="gradient-text">Digital Lifestyle</span>
+                    With Premium Subscriptions
+                </h1>
+                <p class="hero-description">
+                    Access Netflix, Spotify, VPNs, and productivity tools at unbeatable prices. 
+                    Instant activation, 24/7 support, and seamless M-Pesa payments.
+                </p>
                 <div class="hero-stats">
                     <div class="stat">
-                        <span class="stat-number">1000+</span>
-                        <span class="stat-label">Happy Customers</span>
+                        <div class="stat-number">2,000+</div>
+                        <div class="stat-label">Satisfied Customers</div>
                     </div>
                     <div class="stat">
-                        <span class="stat-number">24/7</span>
-                        <span class="stat-label">Support</span>
+                        <div class="stat-number">99.8%</div>
+                        <div class="stat-label">Uptime Rate</div>
                     </div>
                     <div class="stat">
-                        <span class="stat-number">Instant</span>
-                        <span class="stat-label">Activation</span>
+                        <div class="stat-number">24/7</div>
+                        <div class="stat-label">Support</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Donation Section -->
-    <section class="donation-section">
+    <!-- Support Development Section -->
+    <section id="donate" class="support-section">
         <div class="container">
-            <div class="donation-card">
-                <div class="donation-icon">
-                    <i class="fas fa-heart"></i>
-                </div>
-                <div class="donation-content">
-                    <h2>Support Our Development</h2>
-                    <p>Your donations help us improve our services and bring you more amazing features. Every shilling counts!</p>
-                    <div class="donation-options">
-                        <button class="donation-option" data-amount="1">KES 1</button>
-                        <button class="donation-option" data-amount="50">KES 50</button>
-                        <button class="donation-option" data-amount="100">KES 100</button>
-                        <button class="donation-option" data-amount="500">KES 500</button>
+            <div class="support-card">
+                <div class="support-content">
+                    <div class="support-icon">
+                        <i class="fas fa-heart"></i>
                     </div>
-                    <button class="btn-donate" id="openDonationModal">
-                        <i class="fas fa-gift"></i> Make a Donation
+                    <div class="support-text">
+                        <h2>Support Our Development</h2>
+                        <p>Your contributions help us enhance services and bring innovative features. Every shilling makes a difference in our growth journey.</p>
+                    </div>
+                    <button class="support-btn-primary" id="openDonationModal">
+                        <i class="fas fa-gift"></i>
+                        Support Our Work
                     </button>
                 </div>
+                <div class="donation-options">
+                    <div class="donation-option" data-amount="50">
+                        <div class="option-amount">KES 50</div>
+                        <div class="option-label">Coffee</div>
+                    </div>
+                    <div class="donation-option" data-amount="100">
+                        <div class="option-amount">KES 100</div>
+                        <div class="option-label">Snack</div>
+                    </div>
+                    <div class="donation-option" data-amount="500">
+                        <div class="option-amount">KES 500</div>
+                        <div class="option-label">Meal</div>
+                    </div>
+                    <div class="donation-option custom-amount" id="customDonation">
+                        <div class="option-amount">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="option-label">Custom</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Subscription Plans -->
-    <section class="plans-section">
+    <!-- Services Section -->
+    <section id="services" class="services-section">
         <div class="container">
-            <h2 class="section-title">Choose Your Premium Subscription</h2>
-            <p class="section-subtitle">All plans include instant activation and 24/7 support</p>
-            
-            <div class="plans-grid" id="plansGrid">
-                <!-- Plans will be loaded dynamically -->
+            <div class="section-header">
+                <h2>Premium Subscription Services</h2>
+                <p>Choose from our curated selection of premium digital services</p>
+            </div>
+
+            <!-- Categories will be loaded here -->
+            <div id="categoriesContainer" class="categories-container">
+                <!-- Categories loaded dynamically -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose Bera Tech</h2>
+                <p>Experience the difference with our premium service</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Instant Activation</h3>
+                    <p>Get immediate access to your subscriptions right after payment confirmation</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure Payments</h3>
+                    <p>Bank-level security with M-Pesa integration for safe and reliable transactions</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <h3>24/7 Support</h3>
+                    <p>Round-the-clock customer support via WhatsApp for any assistance you need</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Premium Quality</h3>
+                    <p>Only genuine accounts with full feature access and regular updates</p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Payment Modal -->
     <div id="paymentModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-container">
             <div class="modal-header">
-                <h3>Complete Your Purchase</h3>
-                <span class="close">&times;</span>
+                <h3>Complete Your Subscription</h3>
+                <button class="modal-close" id="closePaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <form id="paymentForm">
-                    <div class="plan-summary" id="planSummary">
-                        <!-- Plan details will be populated here -->
+                <form id="paymentForm" class="payment-form">
+                    <div class="plan-summary-card" id="planSummary">
+                        <!-- Dynamic content -->
                     </div>
                     
-                    <div class="form-group">
-                        <label for="customerName">Full Name</label>
-                        <input type="text" id="customerName" name="customerName" required placeholder="Enter your full name">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="customerName">Full Name</label>
+                            <input type="text" id="customerName" name="customerName" required 
+                                   placeholder="Enter your full name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required 
+                                   placeholder="your.email@example.com">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="phoneNumber">M-Pesa Phone Number</label>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" required 
+                                   placeholder="2547XXXXXXXX">
+                            <div class="input-note">Enter your Safaricom M-Pesa registered number</div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <input type="email" id="email" name="email" required placeholder="Enter your email">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="phoneNumber">M-Pesa Phone Number</label>
-                        <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="2547XXXXXXXX">
-                        <small>Enter your M-Pesa registered number</small>
-                    </div>
-                    
-                    <button type="submit" class="btn-pay" id="payButton">
-                        <span class="btn-text">Pay Now via M-Pesa</span>
+                    <button type="submit" class="payment-btn" id="payButton">
+                        <span class="btn-content">
+                            <i class="fas fa-lock"></i>
+                            <span class="btn-text">Pay Securely via M-Pesa</span>
+                        </span>
                         <span class="btn-loading" style="display: none;">
-                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Processing...
                         </span>
                     </button>
                 </form>
@@ -127,43 +223,64 @@
 
     <!-- Donation Modal -->
     <div id="donationModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-container">
             <div class="modal-header">
-                <h3><i class="fas fa-heart"></i> Support Bera Tech</h3>
-                <span class="close">&times;</span>
+                <h3><i class="fas fa-heart"></i> Support Our Development</h3>
+                <button class="modal-close" id="closeDonationModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <form id="donationForm">
-                    <div class="donation-message">
-                        <p>Your support helps us continue providing excellent services. Thank you for considering a donation!</p>
+                <form id="donationForm" class="donation-form">
+                    <div class="donation-hero">
+                        <i class="fas fa-hands-helping"></i>
+                        <p>Your support helps us innovate and deliver exceptional services</p>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="donationAmount">Donation Amount (KES)</label>
-                        <input type="number" id="donationAmount" name="donationAmount" required min="1" max="150000" placeholder="Enter amount (min KES 1)">
-                        <small>Any amount from KES 1 to KES 150,000</small>
+                    <div class="amount-section">
+                        <label>Donation Amount (KES)</label>
+                        <div class="amount-input-container">
+                            <span class="currency">KES</span>
+                            <input type="number" id="donationAmount" name="donationAmount" 
+                                   required min="1" max="150000" placeholder="0">
+                        </div>
+                        <div class="amount-suggestions">
+                            <div class="amount-suggestion" data-amount="100">KES 100</div>
+                            <div class="amount-suggestion" data-amount="500">KES 500</div>
+                            <div class="amount-suggestion" data-amount="1000">KES 1,000</div>
+                            <div class="amount-suggestion" data-amount="5000">KES 5,000</div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="donorName">Your Name (Optional)</label>
-                        <input type="text" id="donorName" name="donorName" placeholder="Enter your name">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="donorName">Your Name (Optional)</label>
+                            <input type="text" id="donorName" name="donorName" 
+                                   placeholder="Enter your name">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="donorMessage">Message of Support (Optional)</label>
+                            <textarea id="donorMessage" name="donorMessage" 
+                                     placeholder="Share an encouraging message..." rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label for="donorPhone">M-Pesa Phone Number</label>
+                            <input type="tel" id="donorPhone" name="donorPhone" required 
+                                   placeholder="2547XXXXXXXX">
+                            <div class="input-note">Enter your Safaricom M-Pesa registered number</div>
+                        </div>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="donorMessage">Message (Optional)</label>
-                        <textarea id="donorMessage" name="donorMessage" placeholder="Leave an encouraging message..." rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="donorPhone">M-Pesa Phone Number</label>
-                        <input type="tel" id="donorPhone" name="donorPhone" required placeholder="2547XXXXXXXX">
-                        <small>Enter your M-Pesa registered number</small>
-                    </div>
-                    
-                    <button type="submit" class="btn-donate-submit" id="donateButton">
-                        <span class="btn-text"><i class="fas fa-heart"></i> Donate Now</span>
+                    <button type="submit" class="donation-submit-btn" id="donateButton">
+                        <span class="btn-content">
+                            <i class="fas fa-heart"></i>
+                            <span class="btn-text">Make a Donation</span>
+                        </span>
                         <span class="btn-loading" style="display: none;">
-                            <i class="fas fa-spinner fa-spin"></i> Processing...
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Processing...
                         </span>
                     </button>
                 </form>
@@ -173,52 +290,44 @@
         </div>
     </div>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="container">
-            <h2 class="section-title">Why Choose Bera Tech?</h2>
-            <div class="features-grid">
-                <div class="feature">
-                    <i class="fas fa-bolt"></i>
-                    <h3>Instant Activation</h3>
-                    <p>Get your account activated immediately after payment confirmation</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-shield-alt"></i>
-                    <h3>100% Secure</h3>
-                    <p>Secure M-Pesa payments with instant confirmation</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-headset"></i>
-                    <h3>24/7 Support</h3>
-                    <p>Round-the-clock customer support via WhatsApp</p>
-                </div>
-                <div class="feature">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <h3>Best Prices</h3>
-                    <p>Most affordable subscription prices in Kenya</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3><i class="fas fa-crown"></i> Bera Tech</h3>
-                    <p>Your trusted partner for premium subscriptions</p>
+                    <div class="footer-logo">
+                        <i class="fas fa-crown"></i>
+                        <span>Bera Tech</span>
+                    </div>
+                    <p>Your trusted partner for premium digital subscriptions and innovative solutions.</p>
                 </div>
+                
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Services</h4>
+                        <a href="#">Streaming</a>
+                        <a href="#">VPN & Security</a>
+                        <a href="#">Productivity Tools</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="https://wa.me/254743982206">WhatsApp Support</a>
+                        <a href="#">Payment Help</a>
+                        <a href="#">FAQ</a>
+                    </div>
+                </div>
+                
                 <div class="footer-contact">
-                    <h4>Contact Support</h4>
-                    <a href="https://wa.me/254743982206" class="whatsapp-link">
-                        <i class="fab fa-whatsapp"></i> +254 743 982 206
+                    <h4>Get in Touch</h4>
+                    <a href="https://wa.me/254743982206" class="contact-link">
+                        <i class="fab fa-whatsapp"></i>
+                        +254 743 982 206
                     </a>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2024 Bera Tech. All rights reserved.</p>
+                <p>&copy; 2024 Bera Tech. All rights reserved. Premium digital services.</p>
             </div>
         </div>
     </footer>

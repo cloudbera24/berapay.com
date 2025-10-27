@@ -1,7 +1,7 @@
 {
-  "name": "bera-pay-platform",
+  "name": "bera-pay",
   "version": "1.0.0",
-  "description": "PayHero Kenya Clone with WhatsApp OTP",
+  "description": "Real-time Payment Gateway with PayHero Integration",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,15 +11,12 @@
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "body-parser": "^1.20.2",
+    "sqlite3": "^5.1.6",
     "dotenv": "^16.3.1",
-    "axios": "^1.5.0",
-    "uuid": "^9.0.0",
-    "bcryptjs": "^2.4.3"
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
   },
-  "devDependencies": {
-    "nodemon": "^3.0.0"
-  },
-  "keywords": ["payhero", "whatsapp", "otp", "kenya"],
-  "author": "Bera Tech",
+  "keywords": ["payment", "gateway", "payhero", "mpesa"],
+  "author": "Bera Pay",
   "license": "MIT"
 }
